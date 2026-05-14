@@ -282,26 +282,57 @@ export default function AdminDashboard({
 
       if (editingTask) {
 
-        const res =
-          await updateTask(
-            token,
-            editingTask,
-            {
-              title:
-                taskTitle,
-
-              description:
-                taskDescription,
-
-              dueDate
-            }
+        const currentTask =
+          tasks.find(
+            (task) =>
+              task._id ===
+              editingTask
           );
+
+        const isOverdue =
+          dueDate &&
+          new Date(dueDate) <
+          new Date() &&
+          currentTask?.status !==
+          "done";
+
+        await updateTask(
+          token,
+          editingTask,
+          {
+            title:
+              taskTitle,
+
+            description:
+              taskDescription,
+
+            dueDate,
+
+            status:
+              isOverdue
+                ? "overdue"
+                : currentTask?.status ||
+                "pending"
+          }
+        );
 
         setTasks(
           tasks.map((task) =>
             task._id ===
               editingTask
-              ? res
+              ? {
+                ...task,
+                title:
+                  taskTitle,
+                description:
+                  taskDescription,
+                dueDate:
+                  dueDate,
+                status:
+                  isOverdue
+                    ? "overdue"
+                    : task.status
+              }
               : task
           )
         );
@@ -974,8 +1005,15 @@ export default function AdminDashboard({
                         No Tasks Added
                       </div>
                     ) : (
-                      tasks.map(
-                        (task) => (
+                      tasks.map((task) => {
+
+                        const isOverdue =
+                          task.dueDate &&
+                          new Date(task.dueDate) <
+                          new Date() &&
+                          task.status !== "done";
+
+                        return (
                           <div
                             key={task._id}
                             style={{
@@ -983,8 +1021,7 @@ export default function AdminDashboard({
                                 "1px solid #ddd",
                               borderRadius:
                                 "6px",
-                              padding:
-                                "8px",
+                              padding: "8px",
                               background:
                                 "white"
                             }}
@@ -1008,7 +1045,8 @@ export default function AdminDashboard({
                               }}
                             >
                               Description:{" "}
-                              {task.description || "No Description"}
+                              {task.description ||
+                                "No Description"}
                             </p>
 
                             <p>
@@ -1020,7 +1058,27 @@ export default function AdminDashboard({
 
                             <p>
                               Status:{" "}
-                              {task.status}
+                              <span
+                                style={{
+                                  color: isOverdue
+                                    ? "red"
+                                    : "#222",
+                                  fontWeight:
+                                    isOverdue
+                                      ? "600"
+                                      : "400"
+                                }}
+                              >
+                                {isOverdue
+                                  ? "Overdue"
+                                  : task.status ===
+                                    "underway"
+                                    ? "Underway"
+                                    : task.status ===
+                                      "done"
+                                      ? "Done"
+                                      : "Pending"}
+                              </span>
                             </p>
 
                             <p>
@@ -1090,8 +1148,8 @@ export default function AdminDashboard({
                               </button>
                             </div>
                           </div>
-                        )
-                      )
+                        );
+                      })
                     )}
                   </div>
                 </div>

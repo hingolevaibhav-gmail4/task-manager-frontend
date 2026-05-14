@@ -338,149 +338,131 @@ export default function MemberDashboard({
                   gap: "8px"
                 }}
               >
-                {tasks.map(
-                  (task) => {
+                {tasks.map((task) => {
 
-                    const isOverdue =
-                      task.dueDate &&
-                      new Date(
-                        task.dueDate
-                      ) < new Date() &&
-                      task.status !==
-                      "done";
-
-                    return (
-                      <div
-                        key={
-                          task._id
-                        }
+                  return (
+                    <div
+                      key={task._id}
+                      style={{
+                        border:
+                          "1px solid #ddd",
+                        borderRadius:
+                          "6px",
+                        padding: "10px",
+                        background:
+                          "white"
+                      }}
+                    >
+                      <h3
                         style={{
-                          border:
-                            "1px solid #ddd",
-                          borderRadius:
-                            "6px",
-                          padding:
-                            "10px",
-                          background:
-                            "white"
+                          fontSize:
+                            "11px",
+                          marginBottom:
+                            "5px"
                         }}
                       >
-                        <h3
-                          style={{
-                            fontSize:
-                              "11px",
-                            marginBottom:
-                              "5px"
-                          }}
-                        >
-                          {
-                            task.title
-                          }
-                        </h3>
+                        {task.title}
+                      </h3>
 
-                        <p
+                      <p
+                        style={{
+                          fontSize: "10px",
+                          marginBottom: "6px",
+                          color: "#222"
+                        }}
+                      >
+                        Description:{" "}
+                        {task.description ||
+                          "No Description"}
+                      </p>
+
+                      <p>
+                        Status:{" "}
+                        <span
                           style={{
-                            fontSize:
-                              "10px",
-                            marginBottom:
-                              "6px",
                             color:
-                              "#222"
+                              task.status ===
+                                "overdue"
+                                ? "red"
+                                : "#222",
+                            fontWeight:
+                              task.status ===
+                                "overdue"
+                                ? "600"
+                                : "400"
                           }}
                         >
-                          Description:
-                          {" "}
-                          {task.description ||
-                            "No Description"}
-                        </p>
-
-                        <p>
-                          Status:
-                          {" "}
                           {task.status ===
-                            "underway"
-                            ? "Underway"
+                            "overdue"
+                            ? "Overdue"
                             : task.status ===
-                              "done"
-                              ? "Done"
-                              : "Pending"}
-                        </p>
-
-                        <p>
-                          Due:
-                          {" "}
-                          {task.dueDate
-                            ? new Date(
-                              task.dueDate
-                            ).toLocaleDateString(
-                              "en-US",
-                              {
-                                month:
-                                  "short",
-                                day: "numeric",
-                                year:
-                                  "numeric"
-                              }
-                            )
-                            : "No Date"}
-                        </p>
-
-                        {isOverdue && (
-                          <p
-                            style={{
-                              color:
-                                "red",
-                              marginBottom:
-                                "6px"
-                            }}
-                          >
-                            Overdue Task
-                          </p>
-                        )}
-
-                        <div
-                          style={{
-                            display:
-                              "flex",
-                            gap: "6px",
-                            marginTop:
-                              "8px",
-                            flexWrap:
-                              "wrap"
-                          }}
-                        >
-                          <button
-                            onClick={() =>
-                              handleStatus(
-                                task._id,
-                                "underway"
-                              )
-                            }
-                            style={
-                              buttonStyle
-                            }
-                          >
-                            Underway
-                          </button>
-
-                          <button
-                            onClick={() =>
-                              handleStatus(
-                                task._id,
+                              "underway"
+                              ? "Underway"
+                              : task.status ===
                                 "done"
-                              )
+                                ? "Done"
+                                : "Pending"}
+                        </span>
+                      </p>
+
+                      <p>
+                        Due Date:{" "}
+                        {task.dueDate
+                          ? new Date(
+                            task.dueDate
+                          ).toLocaleDateString(
+                            "en-US",
+                            {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric"
                             }
-                            style={
-                              buttonStyle
-                            }
-                          >
-                            Done
-                          </button>
-                        </div>
+                          )
+                          : "No Due Date"}
+                      </p>
+
+                      <div
+                        style={{
+                          display:
+                            "flex",
+                          gap: "6px",
+                          marginTop:
+                            "8px",
+                          flexWrap:
+                            "wrap"
+                        }}
+                      >
+                        <button
+                          onClick={() =>
+                            handleStatus(
+                              task._id,
+                              "underway"
+                            )
+                          }
+                          style={
+                            buttonStyle
+                          }
+                        >
+                          Underway
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            handleStatus(
+                              task._id,
+                              "done"
+                            )
+                          }
+                          style={
+                            buttonStyle
+                          }
+                        >
+                          Done
+                        </button>
                       </div>
-                    );
-                  }
-                )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
