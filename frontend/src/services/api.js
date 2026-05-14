@@ -1,11 +1,10 @@
 const API =
-  "http://localhost:5000/api";
+  "https://task-manager-backend-production-247a.up.railway.app/api";
 
 // LOGIN
 export async function loginUser(
   data
 ) {
-
   const res = await fetch(
     `${API}/auth/login`,
     {
@@ -29,7 +28,6 @@ export async function loginUser(
 export async function signupUser(
   data
 ) {
-
   const res = await fetch(
     `${API}/auth/signup`,
     {
@@ -53,7 +51,6 @@ export async function signupUser(
 export async function getProjects(
   token
 ) {
-
   const res = await fetch(
     `${API}/projects`,
     {
@@ -72,7 +69,6 @@ export async function createProject(
   token,
   data
 ) {
-
   const res = await fetch(
     `${API}/projects`,
     {
@@ -100,7 +96,6 @@ export async function deleteProject(
   token,
   id
 ) {
-
   const res = await fetch(
     `${API}/projects/${id}`,
     {
@@ -121,7 +116,6 @@ export async function addMember(
   token,
   data
 ) {
-
   const res = await fetch(
     `${API}/projects/add-member`,
     {
@@ -149,7 +143,6 @@ export async function getTasks(
   token,
   projectId
 ) {
-
   const res = await fetch(
     `${API}/tasks/project/${projectId}`,
     {
@@ -168,7 +161,6 @@ export async function createTask(
   token,
   data
 ) {
-
   const res = await fetch(
     `${API}/tasks`,
     {
@@ -197,7 +189,6 @@ export async function updateTask(
   id,
   data
 ) {
-
   const res = await fetch(
     `${API}/tasks/${id}`,
     {
@@ -225,7 +216,6 @@ export async function deleteTask(
   token,
   id
 ) {
-
   const res = await fetch(
     `${API}/tasks/${id}`,
     {
@@ -245,7 +235,6 @@ export async function deleteTask(
 export async function getDashboard(
   token
 ) {
-
   const res = await fetch(
     `${API}/tasks/dashboard`,
     {
