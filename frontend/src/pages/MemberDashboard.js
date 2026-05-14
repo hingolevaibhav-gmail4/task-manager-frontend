@@ -1,6 +1,7 @@
 import {
   useEffect,
-  useState
+  useState,
+  useCallback
 } from "react";
 
 import {
@@ -25,17 +26,19 @@ export default function MemberDashboard({
     setSelectedProject
   ] = useState(null);
 
-  const loadProjects = async () => {
+  const loadProjects =
+    useCallback(async () => {
 
-    const data =
-      await getProjects(token);
+      const data =
+        await getProjects(token);
 
-    setProjects(
-      Array.isArray(data)
-        ? data
-        : []
-    );
-  };
+      setProjects(
+        Array.isArray(data)
+          ? data
+          : []
+      );
+
+    }, [token]);
 
   useEffect(() => {
     loadProjects();

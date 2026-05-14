@@ -1,4 +1,8 @@
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+  useCallback
+} from "react";
 
 import {
   getProjects,
@@ -59,30 +63,37 @@ export default function AdminDashboard({
   const [editingTask, setEditingTask] =
     useState(null);
 
-  const loadProjects = async () => {
+  const loadProjects =
+    useCallback(async () => {
 
-    const data =
-      await getProjects(token);
+      const data =
+        await getProjects(token);
 
-    setProjects(
-      Array.isArray(data)
-        ? data
-        : []
-    );
-  };
+      setProjects(
+        Array.isArray(data)
+          ? data
+          : []
+      );
 
-  const loadDashboard = async () => {
+    }, [token]);
 
-    const data =
-      await getDashboard(token);
+  const loadDashboard =
+    useCallback(async () => {
 
-    setStats(data || {});
-  };
+      const data =
+        await getDashboard(token);
+
+      setStats(data || {});
+
+    }, [token]);
 
   useEffect(() => {
     loadProjects();
     loadDashboard();
-  }, [loadProjects, loadDashboard]);
+  }, [
+    loadProjects,
+    loadDashboard
+  ]);
 
   const loadTasks = async (
     projectId
