@@ -25,10 +25,6 @@ export default function MemberDashboard({
     setSelectedProject
   ] = useState(null);
 
-  useEffect(() => {
-    loadProjects();
-  }, []);
-
   const loadProjects = async () => {
 
     const data =
@@ -40,6 +36,10 @@ export default function MemberDashboard({
         : []
     );
   };
+
+  useEffect(() => {
+    loadProjects();
+  }, [loadProjects]);
 
   const loadTasks = async (
     projectId
@@ -186,22 +186,22 @@ export default function MemberDashboard({
 
           {projects.length ===
             0 && (
-            <div
-              style={{
-                border:
-                  "1px solid #ddd",
-                borderRadius:
-                  "6px",
-                padding: "12px",
-                background:
-                  "white",
-                textAlign:
-                  "center"
-              }}
-            >
-              No Projects Assigned
-            </div>
-          )}
+              <div
+                style={{
+                  border:
+                    "1px solid #ddd",
+                  borderRadius:
+                    "6px",
+                  padding: "12px",
+                  background:
+                    "white",
+                  textAlign:
+                    "center"
+                }}
+              >
+                No Projects Assigned
+              </div>
+            )}
 
           {projects.map(
             (project) => (
@@ -344,7 +344,7 @@ export default function MemberDashboard({
                         task.dueDate
                       ) < new Date() &&
                       task.status !==
-                        "done";
+                      "done";
 
                     return (
                       <div
@@ -395,12 +395,12 @@ export default function MemberDashboard({
                           Status:
                           {" "}
                           {task.status ===
-                          "underway"
+                            "underway"
                             ? "Underway"
                             : task.status ===
                               "done"
-                            ? "Done"
-                            : "Pending"}
+                              ? "Done"
+                              : "Pending"}
                         </p>
 
                         <p>
@@ -408,17 +408,17 @@ export default function MemberDashboard({
                           {" "}
                           {task.dueDate
                             ? new Date(
-                                task.dueDate
-                              ).toLocaleDateString(
-                                "en-US",
-                                {
-                                  month:
-                                    "short",
-                                  day: "numeric",
-                                  year:
-                                    "numeric"
-                                }
-                              )
+                              task.dueDate
+                            ).toLocaleDateString(
+                              "en-US",
+                              {
+                                month:
+                                  "short",
+                                day: "numeric",
+                                year:
+                                  "numeric"
+                              }
+                            )
                             : "No Date"}
                         </p>
 

@@ -59,11 +59,6 @@ export default function AdminDashboard({
   const [editingTask, setEditingTask] =
     useState(null);
 
-  useEffect(() => {
-    loadProjects();
-    loadDashboard();
-  }, []);
-
   const loadProjects = async () => {
 
     const data =
@@ -83,6 +78,11 @@ export default function AdminDashboard({
 
     setStats(data || {});
   };
+
+  useEffect(() => {
+    loadProjects();
+    loadDashboard();
+  }, [loadProjects, loadDashboard]);
 
   const loadTasks = async (
     projectId
