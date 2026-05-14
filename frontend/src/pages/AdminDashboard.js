@@ -1023,6 +1023,22 @@ export default function AdminDashboard({
                               {task.status}
                             </p>
 
+                            <p>
+                              Due Date:{" "}
+                              {task.dueDate
+                                ? new Date(
+                                  task.dueDate
+                                ).toLocaleDateString(
+                                  "en-US",
+                                  {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric"
+                                  }
+                                )
+                                : "No Due Date"}
+                            </p>
+
                             <div
                               style={{
                                 display:
