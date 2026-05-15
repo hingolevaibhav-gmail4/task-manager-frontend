@@ -13,39 +13,36 @@ export default function Login({
   const [password, setPassword] =
     useState("");
 
+  const [error, setError] =
+    useState("");
+
   const handleLogin = async () => {
     if (!email || !password) {
-      alert("Please fill all fields");
+      setError("Please fill all fields");
       return;
     }
 
+    setError("");
     const res = await loginUser({
       email,
       password
     });
 
     if (res.token) {
-
-      // SAVE TOKEN
       localStorage.setItem(
         "token",
         res.token
       );
 
-      // SAVE ROLE
       localStorage.setItem(
         "role",
         res.role
       );
 
-      // SET STATE
       setToken(res.token);
-
       setRole(res.role);
-
     } else {
-
-      alert(
+      setError(
         res.error || "Login failed"
       );
     }
@@ -54,68 +51,149 @@ export default function Login({
   return (
     <div
       style={{
-        width: "350px",
-        margin: "50px auto",
-        padding: "25px",
-        border: "1px solid #ccc",
-        borderRadius: "10px"
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "20px",
+        background: "linear-gradient(135deg, #007BFF 0%, #0056b3 100%)"
       }}
     >
-      <h2>Login</h2>
-
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) =>
-          setEmail(e.target.value)
-        }
+      <div
         style={{
           width: "100%",
-          padding: "10px",
-          marginBottom: "10px"
-        }}
-      />
-
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) =>
-          setPassword(
-            e.target.value
-          )
-        }
-        style={{
-          width: "100%",
-          padding: "10px",
-          marginBottom: "15px"
-        }}
-      />
-
-      <button
-        onClick={handleLogin}
-        style={{
-          width: "100%",
-          padding: "10px",
-          cursor: "pointer"
+          maxWidth: "450px",
+          padding: "40px 30px",
+          border: "none",
+          borderRadius: "15px",
+          background: "white",
+          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)"
         }}
       >
-        Login
-      </button>
+        <h2
+          style={{
+            fontSize: "32px",
+            fontWeight: "700",
+            marginBottom: "10px",
+            color: "#007BFF",
+            textAlign: "center"
+          }}
+        >
+          TaskFlow
+        </h2>
 
-      <p
-        onClick={() =>
-          setPage("signup")
-        }
-        style={{
-          marginTop: "15px",
-          cursor: "pointer",
-          textAlign: "center"
-        }}
-      >
-        Create new account
-      </p>
+        <p
+          style={{
+            fontSize: "16px",
+            color: "#666",
+            textAlign: "center",
+            marginBottom: "30px"
+          }}
+        >
+          Welcome Back
+        </p>
+
+        {error && (
+          <div
+            style={{
+              padding: "12px 15px",
+              marginBottom: "20px",
+              background: "#FFE5E5",
+              border: "2px solid #FF4444",
+              borderRadius: "8px",
+              color: "#FF4444",
+              fontSize: "14px",
+              fontWeight: "500"
+            }}
+          >
+            {error}
+          </div>
+        )}
+
+        <input
+          type="email"
+          placeholder="Email Address"
+          value={email}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            setError("");
+          }}
+          style={{
+            width: "100%",
+            padding: "14px",
+            marginBottom: "15px",
+            fontSize: "16px",
+            border: "2px solid #e0e0e0",
+            borderRadius: "8px",
+            outline: "none",
+            transition: "border-color 0.3s",
+            fontFamily: "inherit"
+          }}
+          onFocus={(e) => e.target.style.borderColor = "#007BFF"}
+          onBlur={(e) => e.target.style.borderColor = "#e0e0e0"}
+        />
+
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => {
+            setPassword(e.target.value);
+            setError("");
+          }}
+          style={{
+            width: "100%",
+            padding: "14px",
+            marginBottom: "25px",
+            fontSize: "16px",
+            border: "2px solid #e0e0e0",
+            borderRadius: "8px",
+            outline: "none",
+            transition: "border-color 0.3s",
+            fontFamily: "inherit"
+          }}
+          onFocus={(e) => e.target.style.borderColor = "#007BFF"}
+          onBlur={(e) => e.target.style.borderColor = "#e0e0e0"}
+        />
+
+        <button
+          onClick={handleLogin}
+          style={{
+            width: "100%",
+            padding: "14px",
+            marginBottom: "15px",
+            cursor: "pointer",
+            fontSize: "16px",
+            fontWeight: "600",
+            border: "none",
+            borderRadius: "8px",
+            background: "#007BFF",
+            color: "white",
+            transition: "background-color 0.3s"
+          }}
+          onMouseEnter={(e) => e.target.style.background = "#0056b3"}
+          onMouseLeave={(e) => e.target.style.background = "#007BFF"}
+        >
+          Login
+        </button>
+
+        <p
+          onClick={() => setPage("signup")}
+          style={{
+            marginTop: "15px",
+            cursor: "pointer",
+            textAlign: "center",
+            fontSize: "16px",
+            color: "#007BFF",
+            fontWeight: "500",
+            transition: "color 0.3s"
+          }}
+          onMouseEnter={(e) => e.target.style.color = "#0056b3"}
+          onMouseLeave={(e) => e.target.style.color = "#007BFF"}
+        >
+          Don't have an account? Sign up
+        </p>
+      </div>
     </div>
   );
 }

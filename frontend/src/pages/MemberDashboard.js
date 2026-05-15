@@ -102,13 +102,25 @@ export default function MemberDashboard({
     setToken(null);
   };
 
-  const buttonStyle = {
-    padding: "4px 8px",
-    fontSize: "10px",
-    borderRadius: "5px",
+  const buttonStyle = (bgColor = "#007BFF", textColor = "white") => ({
+    padding: "10px 16px",
+    fontSize: "14px",
+    fontWeight: "600",
+    borderRadius: "8px",
     cursor: "pointer",
-    border: "1px solid #000",
-    background: "white"
+    border: "none",
+    background: bgColor,
+    color: textColor,
+    transition: "background-color 0.3s"
+  });
+
+  const getStatusColor = (status) => {
+    switch(status) {
+      case "done": return { bg: "#E8F5E9", text: "#28A745", label: "✓ Done" };
+      case "overdue": return { bg: "#FFEBEE", text: "#FF4444", label: "⚠ Overdue" };
+      case "underway": return { bg: "#FFF3E0", text: "#FFB800", label: "→ Underway" };
+      default: return { bg: "#E3F2FD", text: "#007BFF", label: "○ Pending" };
+    }
   };
 
   return (
@@ -116,10 +128,9 @@ export default function MemberDashboard({
       style={{
         display: "flex",
         flexDirection: "column",
-        height: "100vh",
-        fontFamily:
-          "Inter, Arial",
-        fontSize: "11px",
+        minHeight: "100vh",
+        fontFamily: "Inter, Arial",
+        fontSize: "14px",
         color: "#222",
         overflow: "hidden"
       }}
@@ -128,21 +139,22 @@ export default function MemberDashboard({
       {/* HEADER */}
       <div
         style={{
-          height: "50px",
-          borderBottom: "1px solid #ddd",
+          height: "70px",
+          borderBottom: "3px solid #007BFF",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "0 14px",
-          background: "#ffffff",
+          padding: "0 20px",
+          background: "linear-gradient(135deg, #007BFF 0%, #0056b3 100%)",
           flexShrink: 0
         }}
       >
         <h1
           style={{
-            fontSize: "15px",
-            fontWeight: "600",
-            margin: 0
+            fontSize: "28px",
+            fontWeight: "700",
+            margin: 0,
+            color: "white"
           }}
         >
           Member Dashboard
@@ -152,7 +164,9 @@ export default function MemberDashboard({
           onClick={
             handleLogout
           }
-          style={buttonStyle}
+          style={{...buttonStyle("#FF4444", "white")}}
+          onMouseEnter={(e) => e.target.style.background = "#CC0000"}
+          onMouseLeave={(e) => e.target.style.background = "#FF4444"}
         >
           Logout
         </button>
@@ -163,25 +177,29 @@ export default function MemberDashboard({
         style={{
           display: "flex",
           flex: 1,
-          overflow: "hidden"
+          overflow: "hidden",
+          gap: "1px",
+          background: "#e0e0e0"
         }}
       >
 
         {/* LEFT PROJECT SECTION */}
         <div
           style={{
-            width: "260px",
-            borderRight:
-              "1px solid #ddd",
-            padding: "10px",
+            width: "100%",
+            maxWidth: "280px",
+            borderRight: "3px solid #e0e0e0",
+            padding: "15px",
             overflowY: "auto",
-            background: "#fafafa"
+            background: "#f8f9fa"
           }}
         >
           <h2
             style={{
-              fontSize: "13px",
-              marginBottom: "10px"
+              fontSize: "18px",
+              fontWeight: "700",
+              color: "#007BFF",
+              marginBottom: "15px"
             }}
           >
             Projects
@@ -192,14 +210,16 @@ export default function MemberDashboard({
               <div
                 style={{
                   border:
-                    "1px solid #ddd",
+                    "2px dashed #ddd",
                   borderRadius:
-                    "6px",
-                  padding: "12px",
+                    "10px",
+                  padding: "20px",
                   background:
                     "white",
                   textAlign:
-                    "center"
+                    "center",
+                  fontSize: "14px",
+                  color: "#999"
                 }}
               >
                 No Projects Assigned
@@ -219,28 +239,31 @@ export default function MemberDashboard({
                 }
                 style={{
                   border:
-                    "1px solid #ddd",
+                    selectedProject === project._id ? "3px solid #007BFF" : "2px solid #ddd",
                   borderRadius:
-                    "6px",
-                  padding:
                     "10px",
+                  padding:
+                    "12px",
                   marginBottom:
-                    "8px",
+                    "10px",
                   background:
                     selectedProject ===
                       project._id
-                      ? "#eef4ff"
+                      ? "#E3F2FD"
                       : "white",
                   cursor:
-                    "pointer"
+                    "pointer",
+                  transition: "all 0.3s"
                 }}
               >
                 <h3
                   style={{
                     fontSize:
-                      "11px",
+                      "16px",
+                    fontWeight: "700",
                     marginBottom:
-                      "4px"
+                      "5px",
+                    color: "#222"
                   }}
                 >
                   {
@@ -251,8 +274,9 @@ export default function MemberDashboard({
                 <p
                   style={{
                     fontSize:
-                      "10px",
-                    margin: 0
+                      "13px",
+                    margin: 0,
+                    color: "#666"
                   }}
                 >
                   {
@@ -268,29 +292,25 @@ export default function MemberDashboard({
         <div
           style={{
             flex: 1,
-            padding: "10px",
+            padding: "15px",
             overflowY: "auto",
-            background:
-              "#fff"
+            background: "white"
           }}
         >
           <div
             style={{
-              border:
-                "1px solid #ddd",
-              borderRadius:
-                "6px",
-              padding: "12px",
-              background:
-                "white"
+              border: "2px solid #e0e0e0",
+              borderRadius: "10px",
+              padding: "15px",
+              background: "white"
             }}
           >
             <h2
               style={{
-                fontSize:
-                  "13px",
-                marginBottom:
-                  "10px"
+                fontSize: "18px",
+                fontWeight: "700",
+                marginBottom: "15px",
+                color: "#007BFF"
               }}
             >
               Tasks
@@ -300,14 +320,15 @@ export default function MemberDashboard({
               <div
                 style={{
                   border:
-                    "1px solid #ddd",
+                    "2px dashed #ddd",
                   borderRadius:
-                    "6px",
-                  padding: "20px",
+                    "10px",
+                  padding: "40px 20px",
                   textAlign:
                     "center",
                   fontSize:
-                    "11px"
+                    "16px",
+                  color: "#999"
                 }}
               >
                 Select Project To View Tasks
@@ -317,14 +338,15 @@ export default function MemberDashboard({
               <div
                 style={{
                   border:
-                    "1px solid #ddd",
+                    "2px dashed #ddd",
                   borderRadius:
-                    "6px",
-                  padding: "20px",
+                    "10px",
+                  padding: "40px 20px",
                   textAlign:
                     "center",
                   fontSize:
-                    "11px"
+                    "16px",
+                  color: "#999"
                 }}
               >
                 No Tasks Found
@@ -334,31 +356,45 @@ export default function MemberDashboard({
                 style={{
                   display: "grid",
                   gridTemplateColumns:
-                    "repeat(2, 1fr)",
-                  gap: "8px"
+                    "repeat(auto-fill, minmax(280px, 1fr))",
+                  gap: "15px"
                 }}
               >
                 {tasks.map((task) => {
+
+                  const isOverdue =
+                    task.dueDate &&
+                    new Date(task.dueDate) <
+                    new Date() &&
+                    task.status !== "done";
+
+                  const statusInfo = getStatusColor(isOverdue ? "overdue" : task.status);
 
                   return (
                     <div
                       key={task._id}
                       style={{
-                        border:
-                          "1px solid #ddd",
-                        borderRadius:
-                          "6px",
-                        padding: "10px",
-                        background:
-                          "white"
+                        border: "2px solid #e0e0e0",
+                        borderRadius: "10px",
+                        padding: "15px",
+                        background: "white",
+                        transition: "transform 0.2s, box-shadow 0.2s"
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = "translateY(-4px)";
+                        e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = "translateY(0)";
+                        e.currentTarget.style.boxShadow = "none";
                       }}
                     >
                       <h3
                         style={{
-                          fontSize:
-                            "11px",
-                          marginBottom:
-                            "5px"
+                          fontSize: "16px",
+                          fontWeight: "700",
+                          marginBottom: "10px",
+                          color: "#222"
                         }}
                       >
                         {task.title}
@@ -366,48 +402,38 @@ export default function MemberDashboard({
 
                       <p
                         style={{
-                          fontSize: "10px",
-                          marginBottom: "6px",
-                          color: "#222"
+                          fontSize: "14px",
+                          marginBottom: "10px",
+                          color: "#666"
                         }}
                       >
-                        Description:{" "}
                         {task.description ||
                           "No Description"}
                       </p>
 
-                      <p>
-                        Status:{" "}
-                        <span
-                          style={{
-                            color:
-                              task.status ===
-                                "overdue"
-                                ? "red"
-                                : "#222",
-                            fontWeight:
-                              task.status ===
-                                "overdue"
-                                ? "600"
-                                : "400"
-                          }}
-                        >
-                          {task.status ===
-                            "overdue"
-                            ? "Overdue"
-                            : task.status ===
-                              "underway"
-                              ? "Underway"
-                              : task.status ===
-                                "done"
-                                ? "Done"
-                                : "Pending"}
-                        </span>
-                      </p>
+                      <div
+                        style={{
+                          display: "inline-block",
+                          padding: "6px 12px",
+                          background: statusInfo.bg,
+                          color: statusInfo.text,
+                          borderRadius: "6px",
+                          fontSize: "13px",
+                          fontWeight: "600",
+                          marginBottom: "10px"
+                        }}
+                      >
+                        {statusInfo.label}
+                      </div>
 
-                      <p>
-                        Due Date:{" "}
-                        {task.dueDate
+                      <p
+                        style={{
+                          fontSize: "13px",
+                          marginBottom: "12px",
+                          color: "#666"
+                        }}
+                      >
+                        Due: {task.dueDate
                           ? new Date(
                             task.dueDate
                           ).toLocaleDateString(
@@ -423,13 +449,9 @@ export default function MemberDashboard({
 
                       <div
                         style={{
-                          display:
-                            "flex",
-                          gap: "6px",
-                          marginTop:
-                            "8px",
-                          flexWrap:
-                            "wrap"
+                          display: "flex",
+                          gap: "8px",
+                          flexWrap: "wrap"
                         }}
                       >
                         <button
@@ -439,9 +461,13 @@ export default function MemberDashboard({
                               "underway"
                             )
                           }
-                          style={
-                            buttonStyle
-                          }
+                          style={{
+                            ...buttonStyle("#FFB800", "white"),
+                            flex: 1,
+                            fontSize: "12px"
+                          }}
+                          onMouseEnter={(e) => e.target.style.background = "#CC9500"}
+                          onMouseLeave={(e) => e.target.style.background = "#FFB800"}
                         >
                           Underway
                         </button>
@@ -453,9 +479,13 @@ export default function MemberDashboard({
                               "done"
                             )
                           }
-                          style={
-                            buttonStyle
-                          }
+                          style={{
+                            ...buttonStyle("#28A745", "white"),
+                            flex: 1,
+                            fontSize: "12px"
+                          }}
+                          onMouseEnter={(e) => e.target.style.background = "#218838"}
+                          onMouseLeave={(e) => e.target.style.background = "#28A745"}
                         >
                           Done
                         </button>
