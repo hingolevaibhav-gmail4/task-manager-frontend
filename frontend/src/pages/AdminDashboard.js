@@ -445,7 +445,7 @@ export default function AdminDashboard({
   };
 
   const cardStyle = (bgColor = "#fff") => ({
-    minWidth: "120px",
+    flex: 1,
     border: "2px solid #e0e0e0",
     borderRadius: "10px",
     padding: "12px",
@@ -470,7 +470,7 @@ export default function AdminDashboard({
     switch(status) {
       case "done": return { bg: "#E8F5E9", text: "#28A745", label: "✓ Done" };
       case "overdue": return { bg: "#FFEBEE", text: "#FF4444", label: "⚠ Overdue" };
-      case "underway": return { bg: "#FFF3E0", text: "#FFB800", label: "→ Underway" };
+      case "underway": return { bg: "#FFF3E0", text: "#CC6600", label: "→ Underway" };
       default: return { bg: "#E3F2FD", text: "#007BFF", label: "○ Pending" };
     }
   };
@@ -492,12 +492,12 @@ export default function AdminDashboard({
       <div
         style={{
           height: "70px",
-          borderBottom: "3px solid #007BFF",
+          borderBottom: "2px solid #e0e0e0",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           padding: "0 20px",
-          background: "linear-gradient(135deg, #007BFF 0%, #0056b3 100%)",
+          background: "white",
           flexShrink: 0
         }}
       >
@@ -506,7 +506,7 @@ export default function AdminDashboard({
             fontSize: "28px",
             fontWeight: "700",
             margin: 0,
-            color: "white"
+            color: "#222"
           }}
         >
           Admin Dashboard
@@ -515,8 +515,14 @@ export default function AdminDashboard({
         <button
           onClick={handleLogout}
           style={{...buttonStyle("#FF4444", "white")}}
-          onMouseEnter={(e) => e.target.style.background = "#CC0000"}
-          onMouseLeave={(e) => e.target.style.background = "#FF4444"}
+          onMouseEnter={(e) => {
+            e.target.style.transform = "translateY(-3px)";
+            e.target.style.boxShadow = "0 6px 12px rgba(0,0,0,0.15)";
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.transform = "translateY(0)";
+            e.target.style.boxShadow = "none";
+          }}
         >
           Logout
         </button>
@@ -554,7 +560,7 @@ export default function AdminDashboard({
               style={{
                 fontSize: "18px",
                 fontWeight: "700",
-                color: "#007BFF",
+                color: "#222",
                 marginBottom: "15px"
               }}
             >
@@ -580,7 +586,7 @@ export default function AdminDashboard({
               border: "2px solid #e0e0e0",
               outline: "none"
             }}
-            onFocus={(e) => e.target.style.borderColor = "#007BFF"}
+            onFocus={(e) => e.target.style.borderColor = "#222"}
             onBlur={(e) => e.target.style.borderColor = "#e0e0e0"}
           />
 
@@ -606,7 +612,7 @@ export default function AdminDashboard({
               resize: "vertical",
               fontFamily: "inherit"
             }}
-            onFocus={(e) => e.target.style.borderColor = "#007BFF"}
+            onFocus={(e) => e.target.style.borderColor = "#222"}
             onBlur={(e) => e.target.style.borderColor = "#e0e0e0"}
           />
 
@@ -619,8 +625,14 @@ export default function AdminDashboard({
               width: "100%",
               marginBottom: "15px"
             }}
-            onMouseEnter={(e) => e.target.style.background = "#218838"}
-            onMouseLeave={(e) => e.target.style.background = "#28A745"}
+            onMouseEnter={(e) => {
+              e.target.style.transform = "translateY(-3px)";
+              e.target.style.boxShadow = "0 6px 12px rgba(0,0,0,0.15)";
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = "translateY(0)";
+              e.target.style.boxShadow = "none";
+            }}
           >
             + Create Project
           </button>
@@ -630,11 +642,11 @@ export default function AdminDashboard({
               <div
                 key={project._id}
                 style={{
-                  border: selectedProject === project._id ? "3px solid #007BFF" : "2px solid #ddd",
+                  border: "2px solid #ddd",
                   borderRadius: "10px",
                   padding: "12px",
                   marginBottom: "10px",
-                  background: selectedProject === project._id ? "#E3F2FD" : "white",
+                  background: selectedProject === project._id ? "#f0f0f0" : "white",
                   cursor: "pointer",
                   transition: "all 0.3s"
                 }}
@@ -679,14 +691,51 @@ export default function AdminDashboard({
                   }}
                 >
                   <button
+                    onClick={() => {
+                      if (selectedProject !== project._id) {
+                        alert("Please select the project first to check its tasks");
+                        return;
+                      }
+
+                      const allDone = tasks.length > 0 && tasks.every(task => task.status === "done");
+
+                      if (tasks.length === 0) {
+                        alert("No tasks in this project");
+                      } else if (!allDone) {
+                        const incompleteTasks = tasks.filter(task => task.status !== "done").length;
+                        alert(`Cannot mark project as done. ${incompleteTasks} task(s) still pending.`);
+                      } else {
+                        alert("Project marked as done!");
+                      }
+                    }}
+                    style={{...buttonStyle("#28A745", "white"), flex: 1}}
+                    onMouseEnter={(e) => {
+                      e.target.style.transform = "translateY(-3px)";
+                      e.target.style.boxShadow = "0 6px 12px rgba(0,0,0,0.15)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.transform = "translateY(0)";
+                      e.target.style.boxShadow = "none";
+                    }}
+                  >
+                    Done
+                  </button>
+
+                  <button
                     onClick={() =>
                       handleDeleteProject(
                         project._id
                       )
                     }
                     style={{...buttonStyle("#FF4444", "white"), flex: 1}}
-                    onMouseEnter={(e) => e.target.style.background = "#CC0000"}
-                    onMouseLeave={(e) => e.target.style.background = "#FF4444"}
+                    onMouseEnter={(e) => {
+                      e.target.style.transform = "translateY(-3px)";
+                      e.target.style.boxShadow = "0 6px 12px rgba(0,0,0,0.15)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.transform = "translateY(0)";
+                      e.target.style.boxShadow = "none";
+                    }}
                   >
                     Delete
                   </button>
@@ -718,36 +767,36 @@ export default function AdminDashboard({
               background: "#f8f9fa"
             }}
           >
-            <div style={cardStyle("#E3F2FD")}>
-              <h3 style={{fontSize: "12px", color: "#666", margin: "0 0 5px 0"}}>Total</h3>
-              <p style={{fontSize: "24px", fontWeight: "700", color: "#007BFF", margin: 0}}>
+            <div style={cardStyle("#FFE8D6")}>
+              <h3 style={{fontSize: "12px", fontWeight: "700", color: "#222", margin: "0 0 5px 0"}}>Total tasks</h3>
+              <p style={{fontSize: "24px", fontWeight: "700", color: "#FF9800", margin: 0}}>
                 {stats.total || 0}
               </p>
             </div>
 
             <div style={cardStyle("#E8F5E9")}>
-              <h3 style={{fontSize: "12px", color: "#666", margin: "0 0 5px 0"}}>Done</h3>
+              <h3 style={{fontSize: "12px", fontWeight: "700", color: "#222", margin: "0 0 5px 0"}}>Done</h3>
               <p style={{fontSize: "24px", fontWeight: "700", color: "#28A745", margin: 0}}>
                 {stats.done || 0}
               </p>
             </div>
 
-            <div style={cardStyle("#E3F2FD")}>
-              <h3 style={{fontSize: "12px", color: "#666", margin: "0 0 5px 0"}}>Pending</h3>
-              <p style={{fontSize: "24px", fontWeight: "700", color: "#007BFF", margin: 0}}>
+            <div style={cardStyle("#FFFDE7")}>
+              <h3 style={{fontSize: "12px", fontWeight: "700", color: "#222", margin: "0 0 5px 0"}}>Pending</h3>
+              <p style={{fontSize: "24px", fontWeight: "700", color: "#B8860B", margin: 0}}>
                 {stats.pending || 0}
               </p>
             </div>
 
-            <div style={cardStyle("#FFF3E0")}>
-              <h3 style={{fontSize: "12px", color: "#666", margin: "0 0 5px 0"}}>Underway</h3>
-              <p style={{fontSize: "24px", fontWeight: "700", color: "#FFB800", margin: 0}}>
+            <div style={cardStyle("#E3F2FD")}>
+              <h3 style={{fontSize: "12px", fontWeight: "700", color: "#222", margin: "0 0 5px 0"}}>Underway</h3>
+              <p style={{fontSize: "24px", fontWeight: "700", color: "#007BFF", margin: 0}}>
                 {stats.underway || 0}
               </p>
             </div>
 
             <div style={cardStyle("#FFEBEE")}>
-              <h3 style={{fontSize: "12px", color: "#666", margin: "0 0 5px 0"}}>Overdue</h3>
+              <h3 style={{fontSize: "12px", fontWeight: "700", color: "#222", margin: "0 0 5px 0"}}>Overdue</h3>
               <p style={{fontSize: "24px", fontWeight: "700", color: "#FF4444", margin: 0}}>
                 {stats.overdue || 0}
               </p>
@@ -780,7 +829,7 @@ export default function AdminDashboard({
                       fontSize: "18px",
                       fontWeight: "700",
                       marginBottom: "15px",
-                      color: "#007BFF"
+                      color: "#222"
                     }}
                   >
                     Add Member
@@ -806,7 +855,7 @@ export default function AdminDashboard({
                       border: "2px solid #e0e0e0",
                       outline: "none"
                     }}
-                    onFocus={(e) => e.target.style.borderColor = "#007BFF"}
+                    onFocus={(e) => e.target.style.borderColor = "#222"}
                     onBlur={(e) => e.target.style.borderColor = "#e0e0e0"}
                   />
 
@@ -815,8 +864,14 @@ export default function AdminDashboard({
                       handleAddMember
                     }
                     style={{...buttonStyle("#28A745", "white")}}
-                    onMouseEnter={(e) => e.target.style.background = "#218838"}
-                    onMouseLeave={(e) => e.target.style.background = "#28A745"}
+                    onMouseEnter={(e) => {
+                      e.target.style.transform = "translateY(-3px)";
+                      e.target.style.boxShadow = "0 6px 12px rgba(0,0,0,0.15)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.transform = "translateY(0)";
+                      e.target.style.boxShadow = "none";
+                    }}
                   >
                     + Add Member
                   </button>
@@ -837,7 +892,7 @@ export default function AdminDashboard({
                       fontSize: "18px",
                       fontWeight: "700",
                       marginBottom: "15px",
-                      color: "#007BFF"
+                      color: "#222"
                     }}
                   >
                     {editingTask
@@ -863,7 +918,7 @@ export default function AdminDashboard({
                       border: "2px solid #e0e0e0",
                       outline: "none"
                     }}
-                    onFocus={(e) => e.target.style.borderColor = "#007BFF"}
+                    onFocus={(e) => e.target.style.borderColor = "#222"}
                     onBlur={(e) => e.target.style.borderColor = "#e0e0e0"}
                   />
 
@@ -889,7 +944,7 @@ export default function AdminDashboard({
                       resize: "vertical",
                       fontFamily: "inherit"
                     }}
-                    onFocus={(e) => e.target.style.borderColor = "#007BFF"}
+                    onFocus={(e) => e.target.style.borderColor = "#222"}
                     onBlur={(e) => e.target.style.borderColor = "#e0e0e0"}
                   />
 
@@ -911,7 +966,7 @@ export default function AdminDashboard({
                       border: "2px solid #e0e0e0",
                       outline: "none"
                     }}
-                    onFocus={(e) => e.target.style.borderColor = "#007BFF"}
+                    onFocus={(e) => e.target.style.borderColor = "#222"}
                     onBlur={(e) => e.target.style.borderColor = "#e0e0e0"}
                   />
 
@@ -932,7 +987,7 @@ export default function AdminDashboard({
                       border: "2px solid #e0e0e0",
                       outline: "none"
                     }}
-                    onFocus={(e) => e.target.style.borderColor = "#007BFF"}
+                    onFocus={(e) => e.target.style.borderColor = "#222"}
                     onBlur={(e) => e.target.style.borderColor = "#e0e0e0"}
                   />
 
@@ -940,9 +995,15 @@ export default function AdminDashboard({
                     onClick={
                       handleCreateTask
                     }
-                    style={{...buttonStyle("#007BFF", "white"), width: "100%"}}
-                    onMouseEnter={(e) => e.target.style.background = "#0056b3"}
-                    onMouseLeave={(e) => e.target.style.background = "#007BFF"}
+                    style={{...buttonStyle("#28A745", "white"), width: "100%"}}
+                    onMouseEnter={(e) => {
+                      e.target.style.transform = "translateY(-3px)";
+                      e.target.style.boxShadow = "0 6px 12px rgba(0,0,0,0.15)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.transform = "translateY(0)";
+                      e.target.style.boxShadow = "none";
+                    }}
                   >
                     {editingTask
                       ? "Update Task"
@@ -964,7 +1025,7 @@ export default function AdminDashboard({
                       fontSize: "18px",
                       fontWeight: "700",
                       marginBottom: "15px",
-                      color: "#007BFF"
+                      color: "#222"
                     }}
                   >
                     Tasks
@@ -973,7 +1034,7 @@ export default function AdminDashboard({
                   <div
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+                      gridTemplateColumns: "repeat(3, 1fr)",
                       gap: "15px"
                     }}
                   >
@@ -1010,17 +1071,7 @@ export default function AdminDashboard({
                               border: "2px solid #e0e0e0",
                               borderRadius: "10px",
                               padding: "15px",
-                              background: "white",
-                              transition: "transform 0.2s, box-shadow 0.2s",
-                              cursor: "pointer"
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.transform = "translateY(-4px)";
-                              e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)";
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.transform = "translateY(0)";
-                              e.currentTarget.style.boxShadow = "none";
+                              background: "white"
                             }}
                           >
                             <h3
@@ -1041,7 +1092,7 @@ export default function AdminDashboard({
                                 color: "#666"
                               }}
                             >
-                              {task.description ||
+                              <span style={{fontWeight: "600"}}>Description:</span> {task.description ||
                                 "No Description"}
                             </p>
 
@@ -1052,27 +1103,9 @@ export default function AdminDashboard({
                                 color: "#666"
                               }}
                             >
-                              Assigned to:{" "}
-                              <strong>
-                                {task.assignedTo?.email ||
-                                  "Unassigned"}
-                              </strong>
+                              <span style={{fontWeight: "600"}}>Assigned To:</span> {task.assignedTo?.email ||
+                                "Unassigned"}
                             </p>
-
-                            <div
-                              style={{
-                                display: "inline-block",
-                                padding: "6px 12px",
-                                background: statusInfo.bg,
-                                color: statusInfo.text,
-                                borderRadius: "6px",
-                                fontSize: "13px",
-                                fontWeight: "600",
-                                marginBottom: "10px"
-                              }}
-                            >
-                              {statusInfo.label}
-                            </div>
 
                             <p
                               style={{
@@ -1081,7 +1114,7 @@ export default function AdminDashboard({
                                 color: "#666"
                               }}
                             >
-                              Due: {task.dueDate
+                              <span style={{fontWeight: "600"}}>Due Date:</span> {task.dueDate
                                 ? new Date(
                                   task.dueDate
                                 ).toLocaleDateString(
@@ -1094,6 +1127,22 @@ export default function AdminDashboard({
                                 )
                                 : "No Due Date"}
                             </p>
+
+                            <div
+                              style={{
+                                display: "block",
+                                padding: "6px 12px",
+                                background: statusInfo.bg,
+                                color: statusInfo.text,
+                                borderRadius: "6px",
+                                fontSize: "13px",
+                                fontWeight: "600",
+                                marginBottom: "10px",
+                                textAlign: "center"
+                              }}
+                            >
+                              {statusInfo.label}
+                            </div>
 
                             <div
                               style={{
