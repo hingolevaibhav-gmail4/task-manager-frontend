@@ -45,18 +45,11 @@ https://task-manager-backend-production-247a.up.railway.app
 
 ## Installation
 
----
-
-## Author
-
-Vaibhav Hingole
-
 ### Frontend
 
 ```bash
 npm install
 npm start
-
 ```
 
 ### Backend
@@ -65,3 +58,9 @@ npm start
 npm install
 npm run dev
 ```
+
+---
+
+## Author
+
+Vaibhav Hingole
