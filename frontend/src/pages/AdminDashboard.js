@@ -13,6 +13,7 @@ import {
   deleteTask,
   deleteProject,
   addMember,
+  getMembers,
   getDashboard
 } from "../services/api";
 
@@ -63,6 +64,9 @@ export default function AdminDashboard({
   const [editingTask, setEditingTask] =
     useState(null);
 
+  const [members, setMembers] =
+    useState([]);
+
   const loadProjects =
     useCallback(async () => {
 
@@ -112,6 +116,18 @@ export default function AdminDashboard({
     setTasks(
       Array.isArray(data)
         ? data
+        : []
+    );
+
+    const membersData =
+      await getMembers(
+        token,
+        projectId
+      );
+
+    setMembers(
+      Array.isArray(membersData)
+        ? membersData
         : []
     );
   };
@@ -226,6 +242,18 @@ export default function AdminDashboard({
         );
 
         setMemberEmail("");
+
+        const membersData =
+          await getMembers(
+            token,
+            selectedProject
+          );
+
+        setMembers(
+          Array.isArray(membersData)
+            ? membersData
+            : []
+        );
 
       } else {
 
@@ -446,7 +474,7 @@ export default function AdminDashboard({
 
   const cardStyle = (bgColor = "#fff") => ({
     flex: 1,
-    border: "2px solid #e0e0e0",
+    border: "1px solid #ddd",
     borderRadius: "10px",
     padding: "12px",
     background: bgColor,
@@ -454,7 +482,7 @@ export default function AdminDashboard({
     textAlign: "center"
   });
 
-  const buttonStyle = (bgColor = "#007BFF", textColor = "white") => ({
+  const buttonStyle = (bgColor = "#3B82F6", textColor = "white") => ({
     padding: "10px 16px",
     fontSize: "14px",
     fontWeight: "600",
@@ -467,11 +495,11 @@ export default function AdminDashboard({
   });
 
   const getStatusColor = (status) => {
-    switch(status) {
-      case "done": return { bg: "#E8F5E9", text: "#28A745", label: "✓ Done" };
-      case "overdue": return { bg: "#FFEBEE", text: "#FF4444", label: "⚠ Overdue" };
-      case "underway": return { bg: "#FFF3E0", text: "#CC6600", label: "→ Underway" };
-      default: return { bg: "#E3F2FD", text: "#007BFF", label: "○ Pending" };
+    switch (status) {
+      case "done": return { bg: "#E8F5E9", text: "#22C55E", label: "✓ Done" };
+      case "overdue": return { bg: "#FFEBEE", text: "#FF3B30", label: "⚠ Overdue" };
+      case "underway": return { bg: "#FFF3E0", text: "#F59E0B", label: "→ Underway" };
+      default: return { bg: "#E3F2FD", text: "#3B82F6", label: "○ Pending" };
     }
   };
 
@@ -492,7 +520,7 @@ export default function AdminDashboard({
       <div
         style={{
           height: "70px",
-          borderBottom: "2px solid #e0e0e0",
+          borderBottom: "1px solid #ddd",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -514,7 +542,7 @@ export default function AdminDashboard({
 
         <button
           onClick={handleLogout}
-          style={{...buttonStyle("#FF4444", "white")}}
+          style={{ ...buttonStyle("#FF3B30", "white") }}
           onMouseEnter={(e) => {
             e.target.style.transform = "scale(1.05)";
             e.target.style.boxShadow = "0 8px 16px rgba(0,0,0,0.2)";
@@ -535,7 +563,7 @@ export default function AdminDashboard({
           flex: 1,
           overflow: "hidden",
           gap: "1px",
-          background: "#e0e0e0"
+          background: "#f5f5f5"
         }}
       >
 
@@ -544,7 +572,7 @@ export default function AdminDashboard({
           style={{
             width: "100%",
             maxWidth: "280px",
-            borderRight: "3px solid #e0e0e0",
+            borderRight: "1px solid #ddd",
             padding: "15px",
             overflowY: "auto",
             background: "#f8f9fa"
@@ -583,11 +611,11 @@ export default function AdminDashboard({
               fontSize: "14px",
               marginBottom: "10px",
               borderRadius: "8px",
-              border: "2px solid #e0e0e0",
+              border: "1px solid #ddd",
               outline: "none"
             }}
             onFocus={(e) => e.target.style.borderColor = "#222"}
-            onBlur={(e) => e.target.style.borderColor = "#e0e0e0"}
+            onBlur={(e) => e.target.style.borderColor = "#ddd"}
           />
 
           <textarea
@@ -607,13 +635,13 @@ export default function AdminDashboard({
               marginBottom: "10px",
               minHeight: "70px",
               borderRadius: "8px",
-              border: "2px solid #e0e0e0",
+              border: "1px solid #ddd",
               outline: "none",
               resize: "vertical",
               fontFamily: "inherit"
             }}
             onFocus={(e) => e.target.style.borderColor = "#222"}
-            onBlur={(e) => e.target.style.borderColor = "#e0e0e0"}
+            onBlur={(e) => e.target.style.borderColor = "#ddd"}
           />
 
           <button
@@ -621,7 +649,7 @@ export default function AdminDashboard({
               handleCreateProject
             }
             style={{
-              ...buttonStyle("#28A745", "white"),
+              ...buttonStyle("#22C55E", "white"),
               width: "100%",
               marginBottom: "15px"
             }}
@@ -708,7 +736,7 @@ export default function AdminDashboard({
                         alert("Project marked as done!");
                       }
                     }}
-                    style={{...buttonStyle("#28A745", "white"), flex: 1}}
+                    style={{ ...buttonStyle("#22C55E", "white"), flex: 1 }}
                     onMouseEnter={(e) => {
                       e.target.style.transform = "translateY(-3px)";
                       e.target.style.boxShadow = "0 6px 12px rgba(0,0,0,0.15)";
@@ -727,7 +755,7 @@ export default function AdminDashboard({
                         project._id
                       )
                     }
-                    style={{...buttonStyle("#FF4444", "white"), flex: 1}}
+                    style={{ ...buttonStyle("#FF3B30", "white"), flex: 1 }}
                     onMouseEnter={(e) => {
                       e.target.style.transform = "translateY(-3px)";
                       e.target.style.boxShadow = "0 6px 12px rgba(0,0,0,0.15)";
@@ -760,44 +788,109 @@ export default function AdminDashboard({
           <div
             style={{
               padding: "15px",
-              borderBottom: "2px solid #e0e0e0",
+              borderBottom: "1px solid #ddd",
               display: "flex",
               gap: "12px",
               overflowX: "auto",
               background: "#f8f9fa"
             }}
           >
-            <div style={cardStyle("#FFE8D6")}>
-              <h3 style={{fontSize: "12px", fontWeight: "700", color: "#222", margin: "0 0 5px 0"}}>Total tasks</h3>
-              <p style={{fontSize: "24px", fontWeight: "700", color: "#FF9800", margin: 0}}>
+            <div style={cardStyle("#FF6B35")}>
+              <h3 style={{
+                fontSize: "16px",
+                fontWeight: "700",
+                color: "#FFFFFF",
+                margin: "0 0 5px 0"
+              }}>
+                Total Tasks
+              </h3>
+
+              <p style={{
+                fontSize: "18px",
+                fontWeight: "800",
+                color: "#FFFFFF",
+                margin: 0
+              }}>
                 {stats.total || 0}
               </p>
             </div>
 
-            <div style={cardStyle("#E8F5E9")}>
-              <h3 style={{fontSize: "12px", fontWeight: "700", color: "#222", margin: "0 0 5px 0"}}>Done</h3>
-              <p style={{fontSize: "24px", fontWeight: "700", color: "#28A745", margin: 0}}>
+            <div style={cardStyle("#22C55E")}>
+              <h3 style={{
+                fontSize: "16px",
+                fontWeight: "700",
+                color: "#FFFFFF",
+                margin: "0 0 5px 0"
+              }}>
+                Done
+              </h3>
+
+              <p style={{
+                fontSize: "18px",
+                fontWeight: "800",
+                color: "#FFFFFF",
+                margin: 0
+              }}>
                 {stats.done || 0}
               </p>
             </div>
 
-            <div style={cardStyle("#FFFDE7")}>
-              <h3 style={{fontSize: "12px", fontWeight: "700", color: "#222", margin: "0 0 5px 0"}}>Pending</h3>
-              <p style={{fontSize: "24px", fontWeight: "700", color: "#B8860B", margin: 0}}>
+            <div style={cardStyle("#FACC15")}>
+              <h3 style={{
+                fontSize: "16px",
+                fontWeight: "700",
+                color: "#ffffff",
+                margin: "0 0 5px 0"
+              }}>
+                Pending
+              </h3>
+
+              <p style={{
+                fontSize: "18px",
+                fontWeight: "800",
+                color: "#ffffff",
+                margin: 0
+              }}>
                 {stats.pending || 0}
               </p>
             </div>
 
-            <div style={cardStyle("#E3F2FD")}>
-              <h3 style={{fontSize: "12px", fontWeight: "700", color: "#222", margin: "0 0 5px 0"}}>Underway</h3>
-              <p style={{fontSize: "24px", fontWeight: "700", color: "#007BFF", margin: 0}}>
+            <div style={cardStyle("#3B82F6")}>
+              <h3 style={{
+                fontSize: "16px",
+                fontWeight: "700",
+                color: "#FFFFFF",
+                margin: "0 0 5px 0"
+              }}>
+                Underway
+              </h3>
+
+              <p style={{
+                fontSize: "18px",
+                fontWeight: "800",
+                color: "#FFFFFF",
+                margin: 0
+              }}>
                 {stats.underway || 0}
               </p>
             </div>
 
-            <div style={cardStyle("#FFEBEE")}>
-              <h3 style={{fontSize: "12px", fontWeight: "700", color: "#222", margin: "0 0 5px 0"}}>Overdue</h3>
-              <p style={{fontSize: "24px", fontWeight: "700", color: "#FF4444", margin: 0}}>
+            <div style={cardStyle("#FF3B30")}>
+              <h3 style={{
+                fontSize: "16px",
+                fontWeight: "700",
+                color: "#FFFFFF",
+                margin: "0 0 5px 0"
+              }}>
+                Overdue
+              </h3>
+
+              <p style={{
+                fontSize: "18px",
+                fontWeight: "800",
+                color: "#FFFFFF",
+                margin: 0
+              }}>
                 {stats.overdue || 0}
               </p>
             </div>
@@ -817,7 +910,7 @@ export default function AdminDashboard({
                 {/* ADD MEMBER */}
                 <div
                   style={{
-                    border: "2px solid #e0e0e0",
+                    border: "1px solid #ddd",
                     borderRadius: "10px",
                     padding: "15px",
                     marginBottom: "15px",
@@ -852,18 +945,18 @@ export default function AdminDashboard({
                       fontSize: "14px",
                       marginBottom: "12px",
                       borderRadius: "8px",
-                      border: "2px solid #e0e0e0",
+                      border: "1px solid #ddd",
                       outline: "none"
                     }}
                     onFocus={(e) => e.target.style.borderColor = "#222"}
-                    onBlur={(e) => e.target.style.borderColor = "#e0e0e0"}
+                    onBlur={(e) => e.target.style.borderColor = "#ddd"}
                   />
 
                   <button
                     onClick={
                       handleAddMember
                     }
-                    style={{...buttonStyle("#28A745", "white")}}
+                    style={{ ...buttonStyle("#22C55E", "white") }}
                     onMouseEnter={(e) => {
                       e.target.style.transform = "translateY(-3px)";
                       e.target.style.boxShadow = "0 6px 12px rgba(0,0,0,0.15)";
@@ -877,144 +970,231 @@ export default function AdminDashboard({
                   </button>
                 </div>
 
-                {/* CREATE TASK */}
+                {/* CREATE TASK AND MEMBERS */}
                 <div
                   style={{
-                    border: "2px solid #e0e0e0",
-                    borderRadius: "10px",
-                    padding: "15px",
-                    marginBottom: "15px",
-                    background: "white"
+                    display: "flex",
+                    gap: "15px",
+                    marginBottom: "15px"
                   }}
                 >
-                  <h2
+                  {/* CREATE TASK */}
+                  <div
                     style={{
-                      fontSize: "18px",
-                      fontWeight: "700",
-                      marginBottom: "15px",
-                      color: "#222"
+                      flex: 1,
+                      border: "1px solid #ddd",
+                      borderRadius: "10px",
+                      padding: "15px",
+                      background: "white"
                     }}
                   >
-                    {editingTask
-                      ? "Update Task"
-                      : "Create Task"}
-                  </h2>
+                    <h2
+                      style={{
+                        fontSize: "18px",
+                        fontWeight: "700",
+                        marginBottom: "15px",
+                        color: "#222"
+                      }}
+                    >
+                      {editingTask
+                        ? "Update Task"
+                        : "Create Task"}
+                    </h2>
 
-                  <input
-                    type="text"
-                    placeholder="Task Title"
-                    value={taskTitle}
-                    onChange={(e) =>
-                      setTaskTitle(
-                        e.target.value
-                      )
-                    }
+                    <input
+                      type="text"
+                      placeholder="Task Title"
+                      value={taskTitle}
+                      onChange={(e) =>
+                        setTaskTitle(
+                          e.target.value
+                        )
+                      }
+                      style={{
+                        width: "100%",
+                        padding: "12px",
+                        fontSize: "14px",
+                        marginBottom: "12px",
+                        borderRadius: "8px",
+                        border: "1px solid #ddd",
+                        outline: "none"
+                      }}
+                      onFocus={(e) => e.target.style.borderColor = "#222"}
+                      onBlur={(e) => e.target.style.borderColor = "#ddd"}
+                    />
+
+                    <textarea
+                      placeholder="Task Description"
+                      value={
+                        taskDescription
+                      }
+                      onChange={(e) =>
+                        setTaskDescription(
+                          e.target.value
+                        )
+                      }
+                      style={{
+                        width: "100%",
+                        padding: "12px",
+                        fontSize: "14px",
+                        marginBottom: "12px",
+                        minHeight: "80px",
+                        borderRadius: "8px",
+                        border: "1px solid #ddd",
+                        outline: "none",
+                        resize: "vertical",
+                        fontFamily: "inherit"
+                      }}
+                      onFocus={(e) => e.target.style.borderColor = "#222"}
+                      onBlur={(e) => e.target.style.borderColor = "#ddd"}
+                    />
+
+                    <input
+                      type="email"
+                      placeholder="Assign Member Email"
+                      value={assignEmail}
+                      onChange={(e) =>
+                        setAssignEmail(
+                          e.target.value
+                        )
+                      }
+                      style={{
+                        width: "100%",
+                        padding: "12px",
+                        fontSize: "14px",
+                        marginBottom: "12px",
+                        borderRadius: "8px",
+                        border: "1px solid #ddd",
+                        outline: "none"
+                      }}
+                      onFocus={(e) => e.target.style.borderColor = "#222"}
+                      onBlur={(e) => e.target.style.borderColor = "#ddd"}
+                    />
+
+                    <input
+                      type="date"
+                      value={dueDate}
+                      onChange={(e) =>
+                        setDueDate(
+                          e.target.value
+                        )
+                      }
+                      style={{
+                        width: "100%",
+                        padding: "12px",
+                        fontSize: "14px",
+                        marginBottom: "12px",
+                        borderRadius: "8px",
+                        border: "1px solid #ddd",
+                        outline: "none"
+                      }}
+                      onFocus={(e) => e.target.style.borderColor = "#222"}
+                      onBlur={(e) => e.target.style.borderColor = "#ddd"}
+                    />
+
+                    <button
+                      onClick={
+                        handleCreateTask
+                      }
+                      style={{ ...buttonStyle("#22C55E", "white"), width: "100%" }}
+                      onMouseEnter={(e) => {
+                        e.target.style.transform = "translateY(-3px)";
+                        e.target.style.boxShadow = "0 6px 12px rgba(0,0,0,0.15)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.transform = "translateY(0)";
+                        e.target.style.boxShadow = "none";
+                      }}
+                    >
+                      {editingTask
+                        ? "Update Task"
+                        : "Assign Task"}
+                    </button>
+                  </div>
+
+                  {/* ADDED MEMBERS */}
+                  <div
                     style={{
-                      width: "100%",
-                      padding: "12px",
-                      fontSize: "14px",
-                      marginBottom: "12px",
-                      borderRadius: "8px",
-                      border: "2px solid #e0e0e0",
-                      outline: "none"
-                    }}
-                    onFocus={(e) => e.target.style.borderColor = "#222"}
-                    onBlur={(e) => e.target.style.borderColor = "#e0e0e0"}
-                  />
-
-                  <textarea
-                    placeholder="Task Description"
-                    value={
-                      taskDescription
-                    }
-                    onChange={(e) =>
-                      setTaskDescription(
-                        e.target.value
-                      )
-                    }
-                    style={{
-                      width: "100%",
-                      padding: "12px",
-                      fontSize: "14px",
-                      marginBottom: "12px",
-                      minHeight: "80px",
-                      borderRadius: "8px",
-                      border: "2px solid #e0e0e0",
-                      outline: "none",
-                      resize: "vertical",
-                      fontFamily: "inherit"
-                    }}
-                    onFocus={(e) => e.target.style.borderColor = "#222"}
-                    onBlur={(e) => e.target.style.borderColor = "#e0e0e0"}
-                  />
-
-                  <input
-                    type="email"
-                    placeholder="Assign Member Email"
-                    value={assignEmail}
-                    onChange={(e) =>
-                      setAssignEmail(
-                        e.target.value
-                      )
-                    }
-                    style={{
-                      width: "100%",
-                      padding: "12px",
-                      fontSize: "14px",
-                      marginBottom: "12px",
-                      borderRadius: "8px",
-                      border: "2px solid #e0e0e0",
-                      outline: "none"
-                    }}
-                    onFocus={(e) => e.target.style.borderColor = "#222"}
-                    onBlur={(e) => e.target.style.borderColor = "#e0e0e0"}
-                  />
-
-                  <input
-                    type="date"
-                    value={dueDate}
-                    onChange={(e) =>
-                      setDueDate(
-                        e.target.value
-                      )
-                    }
-                    style={{
-                      width: "100%",
-                      padding: "12px",
-                      fontSize: "14px",
-                      marginBottom: "12px",
-                      borderRadius: "8px",
-                      border: "2px solid #e0e0e0",
-                      outline: "none"
-                    }}
-                    onFocus={(e) => e.target.style.borderColor = "#222"}
-                    onBlur={(e) => e.target.style.borderColor = "#e0e0e0"}
-                  />
-
-                  <button
-                    onClick={
-                      handleCreateTask
-                    }
-                    style={{...buttonStyle("#28A745", "white"), width: "100%"}}
-                    onMouseEnter={(e) => {
-                      e.target.style.transform = "translateY(-3px)";
-                      e.target.style.boxShadow = "0 6px 12px rgba(0,0,0,0.15)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.transform = "translateY(0)";
-                      e.target.style.boxShadow = "none";
+                      flex: 1,
+                      border: "1px solid #ddd",
+                      borderRadius: "10px",
+                      padding: "15px",
+                      background: "white"
                     }}
                   >
-                    {editingTask
-                      ? "Update Task"
-                      : "Assign Task"}
-                  </button>
+                    <h2
+                      style={{
+                        fontSize: "18px",
+                        fontWeight: "700",
+                        marginBottom: "15px",
+                        color: "#222"
+                      }}
+                    >
+                      Project Members
+                    </h2>
+
+                    {members.length === 0 ? (
+                      <div
+                        style={{
+                          padding: "20px",
+                          textAlign: "center",
+                          color: "#999",
+                          fontSize: "14px"
+                        }}
+                      >
+                        No members added yet
+                      </div>
+                    ) : (
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "12px"
+                        }}
+                      >
+                        {members.map((member) => (
+                          <div
+                            key={member._id}
+                            style={{
+                              padding: "12px",
+                              background: "#F9FAFB",
+                              borderRadius: "12px",
+                              border: "1px solid #E5E7EB",
+                              boxShadow: "0 2px 6px rgba(0,0,0,0.05)"
+                            }}
+                          >
+                            <p
+                              style={{
+                                fontSize: "15px",
+                                fontWeight: "700",
+                                margin: "0 0 4px 0",
+                                color: "#111827"
+                              }}
+                            >
+                              `${member.name || "No"} ${member.lastName || "Name"}`
+                            </p>
+
+                            <p
+                              style={{
+                                fontSize: "13px",
+                                margin: 0,
+                                color: "#6B7280",
+                                wordBreak: "break-word"
+                              }}
+                            >
+                              {member.email}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* TASKS */}
                 <div
                   style={{
-                    border: "2px solid #e0e0e0",
+                    border: "1px solid #ddd",
                     borderRadius: "10px",
                     padding: "15px",
                     background: "white"
@@ -1068,7 +1248,7 @@ export default function AdminDashboard({
                           <div
                             key={task._id}
                             style={{
-                              border: "2px solid #e0e0e0",
+                              border: "1px solid #ddd",
                               borderRadius: "10px",
                               padding: "15px",
                               background: "white"
@@ -1078,7 +1258,14 @@ export default function AdminDashboard({
                               style={{
                                 fontSize: "16px",
                                 fontWeight: "700",
-                                marginBottom: "10px",
+                                marginTop: 0,
+                                marginBottom: "12px",
+                                marginLeft: "-15px",
+                                marginRight: "-15px",
+                                paddingLeft: "15px",
+                                paddingRight: "15px",
+                                paddingBottom: "10px",
+                                borderBottom: "1px solid #ddd",
                                 color: "#222"
                               }}
                             >
@@ -1087,34 +1274,34 @@ export default function AdminDashboard({
 
                             <p
                               style={{
-                                fontSize: "14px",
+                                fontSize: "12px",
                                 marginBottom: "10px",
                                 color: "#666"
                               }}
                             >
-                              <span style={{fontWeight: "600"}}>Description:</span> {task.description ||
+                              <span style={{ fontWeight: "600" }}>Description:</span> {task.description ||
                                 "No Description"}
                             </p>
 
                             <p
                               style={{
-                                fontSize: "13px",
+                                fontSize: "12px",
                                 marginBottom: "8px",
                                 color: "#666"
                               }}
                             >
-                              <span style={{fontWeight: "600"}}>Assigned To:</span> {task.assignedTo?.email ||
+                              <span style={{ fontWeight: "600" }}>Assigned To:</span> {task.assignedTo?.email ||
                                 "Unassigned"}
                             </p>
 
                             <p
                               style={{
-                                fontSize: "13px",
+                                fontSize: "12px",
                                 marginBottom: "12px",
                                 color: "#666"
                               }}
                             >
-                              <span style={{fontWeight: "600"}}>Due Date:</span> {task.dueDate
+                              <span style={{ fontWeight: "600" }}>Due Date:</span> {task.dueDate
                                 ? new Date(
                                   task.dueDate
                                 ).toLocaleDateString(
@@ -1158,12 +1345,12 @@ export default function AdminDashboard({
                                   )
                                 }
                                 style={{
-                                  ...buttonStyle("#007BFF", "white"),
+                                  ...buttonStyle("#3B82F6", "white"),
                                   flex: 1,
                                   fontSize: "12px"
                                 }}
-                                onMouseEnter={(e) => e.target.style.background = "#0056b3"}
-                                onMouseLeave={(e) => e.target.style.background = "#007BFF"}
+                                onMouseEnter={(e) => e.target.style.opacity = "0.85"}
+                                onMouseLeave={(e) => e.target.style.opacity = "1"}
                               >
                                 Edit
                               </button>
@@ -1175,12 +1362,12 @@ export default function AdminDashboard({
                                   )
                                 }
                                 style={{
-                                  ...buttonStyle("#28A745", "white"),
+                                  ...buttonStyle("#22C55E", "white"),
                                   flex: 1,
                                   fontSize: "12px"
                                 }}
-                                onMouseEnter={(e) => e.target.style.background = "#218838"}
-                                onMouseLeave={(e) => e.target.style.background = "#28A745"}
+                                onMouseEnter={(e) => e.target.style.opacity = "0.85"}
+                                onMouseLeave={(e) => e.target.style.opacity = "1"}
                               >
                                 Done
                               </button>
@@ -1192,12 +1379,12 @@ export default function AdminDashboard({
                                   )
                                 }
                                 style={{
-                                  ...buttonStyle("#FF4444", "white"),
+                                  ...buttonStyle("#FF3B30", "white"),
                                   flex: 1,
                                   fontSize: "12px"
                                 }}
-                                onMouseEnter={(e) => e.target.style.background = "#CC0000"}
-                                onMouseLeave={(e) => e.target.style.background = "#FF4444"}
+                                onMouseEnter={(e) => e.target.style.opacity = "0.85"}
+                                onMouseLeave={(e) => e.target.style.opacity = "1"}
                               >
                                 Delete
                               </button>

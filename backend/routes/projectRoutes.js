@@ -14,7 +14,8 @@ const {
   createProject,
   getProjects,
   addMember,
-  deleteProject
+  deleteProject,
+  getMembers
 } = require(
   "../controllers/projectController"
 );
@@ -48,6 +49,13 @@ router.delete(
   auth,
   role(["admin"]),
   deleteProject
+);
+
+// GET MEMBERS
+router.get(
+  "/:id/members",
+  auth,
+  getMembers
 );
 
 module.exports = router;

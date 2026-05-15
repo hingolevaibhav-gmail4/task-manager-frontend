@@ -138,6 +138,24 @@ export async function addMember(
   return res.json();
 }
 
+// GET MEMBERS
+export async function getMembers(
+  token,
+  projectId
+) {
+  const res = await fetch(
+    `${API}/projects/${projectId}/members`,
+    {
+      headers: {
+        Authorization:
+          `Bearer ${token}`
+      }
+    }
+  );
+
+  return res.json();
+}
+
 // GET TASKS
 export async function getTasks(
   token,
