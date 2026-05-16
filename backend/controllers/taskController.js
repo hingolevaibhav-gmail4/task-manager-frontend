@@ -68,10 +68,7 @@ exports.createTask =
           assignedTo:
             user._id,
 
-          dueDate,
-
-          status:
-            "pending"
+          dueDate
         });
 
       const populated =
@@ -223,7 +220,8 @@ exports.getDashboard =
       let tasks = [];
 
       if (
-        req.user.role === "admin"
+        req.user.role ===
+        "admin"
       ) {
 
         tasks =
@@ -238,120 +236,44 @@ exports.getDashboard =
           });
       }
 
-      const getDateOnly =
-        (date) => {
+      const now =
+        new Date();
 
-          if (!date)
-            return null;
-
-          const d =
-            new Date(date);
-
-          return new Date(
-            d.getFullYear(),
-            d.getMonth(),
-            d.getDate()
-          );
-        };
-
-      const today =
-        getDateOnly(
-          new Date()
-        );
-
-      // DONE
-      const done =
-        tasks.filter(
-          (task) =>
-            task.status ===
-            "done"
-        ).length;
-
-      // OVERDUE
       const overdue =
         tasks.filter(
-          (task) => {
-
-            if (
-              !task.dueDate ||
-              task.status ===
-              "done"
-            ) {
-              return false;
-            }
-
-            const due =
-              getDateOnly(
-                task.dueDate
-              );
-
-            return due < today;
-          }
-        ).length;
-
-      // PENDING
-      const pending =
-        tasks.filter(
-          (task) => {
-
-            if (
-              task.status !==
-              "pending"
-            ) {
-              return false;
-            }
-
-            if (
-              !task.dueDate
-            ) {
-              return true;
-            }
-
-            const due =
-              getDateOnly(
-                task.dueDate
-              );
-
-            return due >= today;
-          }
-        ).length;
-
-      // UNDERWAY
-      const underway =
-        tasks.filter(
-          (task) => {
-
-            if (
-              task.status !==
-              "underway"
-            ) {
-              return false;
-            }
-
-            if (
-              !task.dueDate
-            ) {
-              return true;
-            }
-
-            const due =
-              getDateOnly(
-                task.dueDate
-              );
-
-            return due >= today;
-          }
+          (task) =>
+            task.dueDate &&
+            new Date(
+              task.dueDate
+            ) < now &&
+            task.status !==
+            "done"
         ).length;
 
       res.json({
         total:
           tasks.length,
 
-        done,
+        done:
+          tasks.filter(
+            (t) =>
+              t.status ===
+              "done"
+          ).length,
 
-        pending,
+        pending:
+          tasks.filter(
+            (t) =>
+              t.status ===
+              "pending"
+          ).length,
 
-        underway,
+        underway:
+          tasks.filter(
+            (t) =>
+              t.status ===
+              "underway"
+          ).length,
 
         overdue
       });
@@ -359,8 +281,7 @@ exports.getDashboard =
     } catch (err) {
 
       res.status(400).json({
-        error:
-          err.message
+        error: err.message
       });
     }
   };
