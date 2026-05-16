@@ -68,10 +68,7 @@ exports.createTask =
           assignedTo:
             user._id,
 
-          dueDate,
-
-          status:
-            "pending"
+          dueDate
         });
 
       const populated =
@@ -87,8 +84,7 @@ exports.createTask =
     } catch (err) {
 
       res.status(400).json({
-        error:
-          err.message
+        error: err.message
       });
     }
   };
