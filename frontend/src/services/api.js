@@ -1,5 +1,5 @@
 const API =
-  "https://task-manager-backend-production-247a.up.railway.app/api";
+  "http://localhost:5000/api";
 
 // LOGIN
 export async function loginUser(
