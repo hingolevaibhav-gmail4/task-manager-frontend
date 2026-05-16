@@ -970,25 +970,17 @@ export default function AdminDashboard({
                   </button>
                 </div>
 
-                {/* CREATE TASK AND MEMBERS */}
+                {/* CREATE TASK */}
                 <div
                   style={{
-                    display: "flex",
-                    gap: "15px",
-                    marginBottom: "15px"
+                    border: "1px solid #ddd",
+                    borderRadius: "10px",
+                    padding: "15px",
+                    marginBottom: "15px",
+                    background: "white"
                   }}
                 >
-                  {/* CREATE TASK */}
-                  <div
-                    style={{
-                      flex: 1,
-                      border: "1px solid #ddd",
-                      borderRadius: "10px",
-                      padding: "15px",
-                      background: "white"
-                    }}
-                  >
-                    <h2
+                  <h2
                       style={{
                         fontSize: "18px",
                         fontWeight: "700",
@@ -1111,85 +1103,6 @@ export default function AdminDashboard({
                         : "Assign Task"}
                     </button>
                   </div>
-
-                  {/* ADDED MEMBERS */}
-                  <div
-                    style={{
-                      flex: 1,
-                      border: "1px solid #ddd",
-                      borderRadius: "10px",
-                      padding: "15px",
-                      background: "white"
-                    }}
-                  >
-                    <h2
-                      style={{
-                        fontSize: "18px",
-                        fontWeight: "700",
-                        marginBottom: "15px",
-                        color: "#222"
-                      }}
-                    >
-                      Project Members
-                    </h2>
-
-                    {members.length === 0 ? (
-                      <div
-                        style={{
-                          padding: "20px",
-                          textAlign: "center",
-                          color: "#999",
-                          fontSize: "14px"
-                        }}
-                      >
-                        No members added yet
-                      </div>
-                    ) : (
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: "12px"
-                        }}
-                      >
-                        {members.map((member) => (
-                          <div
-                            key={member._id}
-                            style={{
-                              padding: "12px",
-                              background: "#F9FAFB",
-                              borderRadius: "12px",
-                              border: "1px solid #E5E7EB",
-                              boxShadow: "0 2px 6px rgba(0,0,0,0.05)"
-                            }}
-                          >
-                            <p
-                              style={{
-                                fontSize: "15px",
-                                fontWeight: "700",
-                                margin: "0 0 4px 0",
-                                color: "#111827"
-                              }}
-                            >
-                              `${member.name || "No"} ${member.lastName || "Name"}`
-                            </p>
-
-                            <p
-                              style={{
-                                fontSize: "13px",
-                                margin: 0,
-                                color: "#6B7280",
-                                wordBreak: "break-word"
-                              }}
-                            >
-                              {member.email}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
 
                 {/* TASKS */}
                 <div
