@@ -87,8 +87,7 @@ exports.createTask =
     } catch (err) {
 
       res.status(400).json({
-        error:
-          err.message
+        error: err.message
       });
     }
   };
@@ -136,8 +135,7 @@ exports.getTasksByProject =
     } catch (err) {
 
       res.status(400).json({
-        error:
-          err.message
+        error: err.message
       });
     }
   };
@@ -190,8 +188,7 @@ exports.updateTaskStatus =
     } catch (err) {
 
       res.status(400).json({
-        error:
-          err.message
+        error: err.message
       });
     }
   };
@@ -213,8 +210,7 @@ exports.deleteTask =
     } catch (err) {
 
       res.status(400).json({
-        error:
-          err.message
+        error: err.message
       });
     }
   };
@@ -227,8 +223,7 @@ exports.getDashboard =
       let tasks = [];
 
       if (
-        req.user.role ===
-        "admin"
+        req.user.role === "admin"
       ) {
 
         tasks =
