@@ -58,49 +58,115 @@ export default function MemberDashboard({
   const calculateStats =
     (tasksArray) => {
 
+      const getDateOnly =
+        (date) => {
+
+          if (!date)
+            return null;
+
+          const d =
+            new Date(date);
+
+          return new Date(
+            d.getFullYear(),
+            d.getMonth(),
+            d.getDate()
+          );
+        };
+
+      const today =
+        getDateOnly(
+          new Date()
+        );
+
       const total =
         tasksArray.length;
 
       const done =
         tasksArray.filter(
-          (t) =>
-            t.status ===
+          (task) =>
+            task.status ===
             "done"
-        ).length;
-
-      const underway =
-        tasksArray.filter(
-          (t) =>
-            t.status ===
-            "underway"
-        ).length;
-
-      const pending =
-        tasksArray.filter(
-          (t) =>
-            t.status ===
-            "pending"
         ).length;
 
       const overdue =
         tasksArray.filter(
-          (t) => {
-            return (
-              t.dueDate &&
-              new Date(
-                t.dueDate
-              ) < new Date() &&
-              t.status !==
+          (task) => {
+
+            if (
+              !task.dueDate ||
+              task.status ===
               "done"
-            );
+            ) {
+              return false;
+            }
+
+            const due =
+              getDateOnly(
+                task.dueDate
+              );
+
+            return due < today;
+          }
+        ).length;
+
+      const pending =
+        tasksArray.filter(
+          (task) => {
+
+            if (
+              task.status !==
+              "pending"
+            ) {
+              return false;
+            }
+
+            if (
+              !task.dueDate
+            ) {
+              return true;
+            }
+
+            const due =
+              getDateOnly(
+                task.dueDate
+              );
+
+            return due >= today;
+          }
+        ).length;
+
+      const underway =
+        tasksArray.filter(
+          (task) => {
+
+            if (
+              task.status !==
+              "underway"
+            ) {
+              return false;
+            }
+
+            if (
+              !task.dueDate
+            ) {
+              return true;
+            }
+
+            const due =
+              getDateOnly(
+                task.dueDate
+              );
+
+            return due >= today;
           }
         ).length;
 
       setStats({
         total,
         done,
-        underway,
         pending,
+        underway,
         overdue
       });
     };

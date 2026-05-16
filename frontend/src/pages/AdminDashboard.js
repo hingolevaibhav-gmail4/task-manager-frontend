@@ -202,10 +202,19 @@ export default function AdminDashboard({
               "Failed to add member"
             );
           }
+
+          setTimeout(() => {
+            setMemberError("");
+          }, 3000);
+
         } else {
           setMemberError(
             "Unexpected response from server"
           );
+
+          setTimeout(() => {
+            setMemberError("");
+          }, 3000);
         }
       } catch (err) {
 
@@ -383,13 +392,6 @@ export default function AdminDashboard({
               editingTask
           );
 
-        const isOverdue =
-          dueDate &&
-          new Date(dueDate) <
-          new Date() &&
-          currentTask?.status !==
-          "done";
-
         await updateTask(
           token,
           editingTask,
@@ -403,10 +405,8 @@ export default function AdminDashboard({
             dueDate,
 
             status:
-              isOverdue
-                ? "overdue"
-                : currentTask?.status ||
-                "pending"
+              currentTask?.status ||
+              "pending"
           }
         );
 
@@ -423,9 +423,7 @@ export default function AdminDashboard({
                 dueDate:
                   dueDate,
                 status:
-                  isOverdue
-                    ? "overdue"
-                    : task.status
+                  task.status
               }
               : task
           )
@@ -1262,10 +1260,18 @@ export default function AdminDashboard({
                     ) : (
                       tasks.map((task) => {
 
+                        const getDateOnly = (date) => {
+                          if (!date) return null;
+                          const d = new Date(date);
+                          return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+                        };
+
+                        const taskDueDate = getDateOnly(task.dueDate);
+                        const today = getDateOnly(new Date());
+
                         const isOverdue =
                           task.dueDate &&
-                          new Date(task.dueDate) <
-                          new Date() &&
+                          taskDueDate < today &&
                           task.status !== "done";
 
                         const statusInfo = getStatusColor(isOverdue ? "overdue" : task.status);
