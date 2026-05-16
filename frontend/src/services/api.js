@@ -116,26 +116,51 @@ export async function addMember(
   token,
   data
 ) {
-  const res = await fetch(
-    `${API}/projects/add-member`,
-    {
-      method: "PUT",
+  try {
+    const res = await fetch(
+      `${API}/projects/add-member`,
+      {
+        method: "PUT",
 
-      headers: {
-        "Content-Type":
-          "application/json",
+        headers: {
+          "Content-Type":
+            "application/json",
 
-        Authorization:
-          `Bearer ${token}`
-      },
+          Authorization:
+            `Bearer ${token}`
+        },
 
-      body: JSON.stringify(
-        data
-      )
+        body: JSON.stringify(
+          data
+        )
+      }
+    );
+
+    const responseData =
+      await res.json();
+
+    if (!res.ok) {
+      console.error(
+        "addMember error:",
+        responseData
+      );
+      return responseData;
     }
-  );
 
-  return res.json();
+    console.log(
+      "addMember response:",
+      responseData
+    );
+    return responseData;
+  } catch (err) {
+    console.error(
+      "addMember fetch error:",
+      err
+    );
+    return {
+      error: err.message
+    };
+  }
 }
 
 // GET MEMBERS
@@ -143,17 +168,39 @@ export async function getMembers(
   token,
   projectId
 ) {
-  const res = await fetch(
-    `${API}/projects/${projectId}/members`,
-    {
-      headers: {
-        Authorization:
-          `Bearer ${token}`
+  try {
+    const res = await fetch(
+      `${API}/projects/${projectId}/members`,
+      {
+        headers: {
+          Authorization:
+            `Bearer ${token}`
+        }
       }
-    }
-  );
+    );
 
-  return res.json();
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error(
+        "getMembers error:",
+        data
+      );
+      return [];
+    }
+
+    console.log(
+      "getMembers response:",
+      data
+    );
+    return data;
+  } catch (err) {
+    console.error(
+      "getMembers fetch error:",
+      err
+    );
+    return [];
+  }
 }
 
 // GET TASKS

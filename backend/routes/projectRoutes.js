@@ -24,7 +24,6 @@ const {
 router.post(
   "/",
   auth,
-  role(["admin"]),
   createProject
 );
 
@@ -39,7 +38,6 @@ router.get(
 router.put(
   "/add-member",
   auth,
-  role(["admin"]),
   addMember
 );
 
@@ -47,7 +45,6 @@ router.put(
 router.delete(
   "/:id",
   auth,
-  role(["admin"]),
   deleteProject
 );
 

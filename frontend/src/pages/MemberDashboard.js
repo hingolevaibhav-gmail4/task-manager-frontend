@@ -10,6 +10,14 @@ import {
   updateTask
 } from "../services/api";
 
+const scrollbarHideStyle = `
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+`;
+
 export default function MemberDashboard({
   token,
   setToken
@@ -25,6 +33,9 @@ export default function MemberDashboard({
     selectedProject,
     setSelectedProject
   ] = useState(null);
+
+  const [stats, setStats] =
+    useState({});
 
   const loadProjects =
     useCallback(async () => {
@@ -44,6 +55,56 @@ export default function MemberDashboard({
     loadProjects();
   }, [loadProjects]);
 
+  const calculateStats =
+    (tasksArray) => {
+
+      const total =
+        tasksArray.length;
+
+      const done =
+        tasksArray.filter(
+          (t) =>
+            t.status ===
+            "done"
+        ).length;
+
+      const underway =
+        tasksArray.filter(
+          (t) =>
+            t.status ===
+            "underway"
+        ).length;
+
+      const pending =
+        tasksArray.filter(
+          (t) =>
+            t.status ===
+            "pending"
+        ).length;
+
+      const overdue =
+        tasksArray.filter(
+          (t) => {
+            return (
+              t.dueDate &&
+              new Date(
+                t.dueDate
+              ) < new Date() &&
+              t.status !==
+              "done"
+            );
+          }
+        ).length;
+
+      setStats({
+        total,
+        done,
+        underway,
+        pending,
+        overdue
+      });
+    };
+
   const loadTasks = async (
     projectId
   ) => {
@@ -58,10 +119,15 @@ export default function MemberDashboard({
         projectId
       );
 
-    setTasks(
+    const tasksArray =
       Array.isArray(data)
         ? data
-        : []
+        : [];
+
+    setTasks(tasksArray);
+
+    calculateStats(
+      tasksArray
     );
   };
 
@@ -80,12 +146,19 @@ export default function MemberDashboard({
           }
         );
 
-      setTasks(
+      const updatedTasks =
         tasks.map((task) =>
           task._id === id
             ? res
             : task
-        )
+        );
+
+      setTasks(
+        updatedTasks
+      );
+
+      calculateStats(
+        updatedTasks
       );
     };
 
@@ -102,7 +175,22 @@ export default function MemberDashboard({
     setToken(null);
   };
 
-  const buttonStyle = (bgColor = "#007BFF", textColor = "white") => ({
+  const cardStyle = (
+    bgColor = "#fff"
+  ) => ({
+    flex: 1,
+    border: "1px solid #ddd",
+    borderRadius: "10px",
+    padding: "12px",
+    background: bgColor,
+    fontSize: "14px",
+    textAlign: "center"
+  });
+
+  const buttonStyle = (
+    bgColor = "#3B82F6",
+    textColor = "white"
+  ) => ({
     padding: "10px 16px",
     fontSize: "14px",
     fontWeight: "600",
@@ -111,41 +199,78 @@ export default function MemberDashboard({
     border: "none",
     background: bgColor,
     color: textColor,
-    transition: "background-color 0.3s"
+    transition:
+      "all 0.3s ease-in-out"
   });
 
-  const getStatusColor = (status) => {
-    switch(status) {
-      case "done": return { bg: "#E8F5E9", text: "#28A745", label: "✓ Done" };
-      case "overdue": return { bg: "#FFEBEE", text: "#FF4444", label: "⚠ Overdue" };
-      case "underway": return { bg: "#FFF3E0", text: "#FFB800", label: "→ Underway" };
-      default: return { bg: "#E3F2FD", text: "#007BFF", label: "○ Pending" };
-    }
-  };
+  const getStatusColor =
+    (status) => {
+
+      switch (status) {
+
+        case "done":
+          return {
+            bg: "#E8F5E9",
+            text: "#22C55E",
+            label: "✓ Done"
+          };
+
+        case "overdue":
+          return {
+            bg: "#FFEBEE",
+            text: "#FF3B30",
+            label:
+              "⚠ Overdue"
+          };
+
+        case "underway":
+          return {
+            bg: "#FFF3E0",
+            text: "#F59E0B",
+            label:
+              "→ Underway"
+          };
+
+        default:
+          return {
+            bg: "#E3F2FD",
+            text: "#3B82F6",
+            label:
+              "○ Pending"
+          };
+      }
+    };
 
   return (
     <div
       style={{
         display: "flex",
-        flexDirection: "column",
+        flexDirection:
+          "column",
         minHeight: "100vh",
-        fontFamily: "Inter, Arial",
+        fontFamily:
+          "Inter, Arial",
         fontSize: "14px",
         color: "#222",
         overflow: "hidden"
       }}
     >
+      <style>{scrollbarHideStyle}</style>
 
       {/* HEADER */}
       <div
         style={{
           height: "70px",
-          borderBottom: "3px solid #007BFF",
+          borderBottom:
+            "1px solid #ddd",
           display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "0 20px",
-          background: "linear-gradient(135deg, #007BFF 0%, #0056b3 100%)",
+          alignItems:
+            "center",
+          justifyContent:
+            "space-between",
+          padding:
+            "0 20px",
+          background: "white",
           flexShrink: 0
         }}
       >
@@ -154,7 +279,7 @@ export default function MemberDashboard({
             fontSize: "28px",
             fontWeight: "700",
             margin: 0,
-            color: "white"
+            color: "#222"
           }}
         >
           Member Dashboard
@@ -164,9 +289,28 @@ export default function MemberDashboard({
           onClick={
             handleLogout
           }
-          style={{...buttonStyle("#FF4444", "white")}}
-          onMouseEnter={(e) => e.target.style.background = "#CC0000"}
-          onMouseLeave={(e) => e.target.style.background = "#FF4444"}
+          style={{
+            ...buttonStyle(
+              "#FF3B30",
+              "white"
+            )
+          }}
+          onMouseEnter={(
+            e
+          ) => {
+            e.target.style.transform =
+              "scale(1.05)";
+            e.target.style.boxShadow =
+              "0 8px 16px rgba(0,0,0,0.2)";
+          }}
+          onMouseLeave={(
+            e
+          ) => {
+            e.target.style.transform =
+              "scale(1)";
+            e.target.style.boxShadow =
+              "none";
+          }}
         >
           Logout
         </button>
@@ -179,31 +323,48 @@ export default function MemberDashboard({
           flex: 1,
           overflow: "hidden",
           gap: "1px",
-          background: "#e0e0e0"
+          background:
+            "#f5f5f5"
         }}
       >
 
-        {/* LEFT PROJECT SECTION */}
+        {/* LEFT SIDEBAR */}
         <div
           style={{
             width: "100%",
             maxWidth: "280px",
-            borderRight: "3px solid #e0e0e0",
+            borderRight:
+              "1px solid #ddd",
             padding: "15px",
             overflowY: "auto",
-            background: "#f8f9fa"
+            background:
+              "#f8f9fa"
           }}
         >
-          <h2
+
+          <div
             style={{
-              fontSize: "18px",
-              fontWeight: "700",
-              color: "#007BFF",
-              marginBottom: "15px"
+              marginBottom:
+                "15px"
             }}
           >
-            Projects
-          </h2>
+            <div
+              style={{
+                marginBottom: "15px"
+              }}
+            >
+              <h2
+                style={{
+                  fontSize: "18px",
+                  fontWeight: "700",
+                  color: "#222",
+                  marginBottom: "15px"
+                }}
+              >
+                Projects
+              </h2>
+            </div>
+          </div>
 
           {projects.length ===
             0 && (
@@ -213,12 +374,14 @@ export default function MemberDashboard({
                     "2px dashed #ddd",
                   borderRadius:
                     "10px",
-                  padding: "20px",
+                  padding:
+                    "20px",
                   background:
                     "white",
                   textAlign:
                     "center",
-                  fontSize: "14px",
+                  fontSize:
+                    "14px",
                   color: "#999"
                 }}
               >
@@ -239,7 +402,10 @@ export default function MemberDashboard({
                 }
                 style={{
                   border:
-                    selectedProject === project._id ? "3px solid #007BFF" : "2px solid #ddd",
+                    selectedProject ===
+                      project._id
+                      ? "1px solid #222"
+                      : "1px solid #ddd",
                   borderRadius:
                     "10px",
                   padding:
@@ -249,21 +415,25 @@ export default function MemberDashboard({
                   background:
                     selectedProject ===
                       project._id
-                      ? "#E3F2FD"
+                      ? "#f0f0f0"
                       : "white",
                   cursor:
                     "pointer",
-                  transition: "all 0.3s"
+                  transition:
+                    "all 0.3s"
                 }}
               >
                 <h3
                   style={{
                     fontSize:
                       "16px",
-                    fontWeight: "700",
+                    fontWeight:
+                      "700",
+                    margin: 0,
                     marginBottom:
-                      "5px",
-                    color: "#222"
+                      "16px",
+                    color:
+                      "#222"
                   }}
                 >
                   {
@@ -276,225 +446,547 @@ export default function MemberDashboard({
                     fontSize:
                       "13px",
                     margin: 0,
-                    color: "#666"
+                    color:
+                      "#7e7e7e"
                   }}
                 >
-                  {
-                    project.description
-                  }
+                  <p
+                    style={{
+                      fontSize:
+                        "12px",
+                      marginBottom:
+                        "10px",
+                      color:
+                        "#616161"
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontWeight:
+                          "700"
+                      }}
+                    >
+                      Description:
+                    </span>{" "}
+                    {
+                      project.description
+                    }
+                  </p>
                 </p>
               </div>
             )
           )}
         </div>
 
-        {/* RIGHT TASK SECTION */}
+        {/* RIGHT CONTENT */}
         <div
           style={{
             flex: 1,
-            padding: "15px",
-            overflowY: "auto",
-            background: "white"
+            display: "flex",
+            flexDirection:
+              "column",
+            overflow:
+              "hidden",
+            background:
+              "white"
           }}
         >
+
+          {/* TOP DASHBOARD STATS */}
           <div
             style={{
-              border: "2px solid #e0e0e0",
-              borderRadius: "10px",
               padding: "15px",
-              background: "white"
+              borderBottom:
+                "1px solid #ddd",
+              display: "flex",
+              gap: "12px",
+              overflowX:
+                "auto",
+              background:
+                "#f8f9fa"
             }}
           >
-            <h2
+            <div
+              style={cardStyle(
+                "#FF6B35"
+              )}
+            >
+              <h3
+                style={{
+                  fontSize:
+                    "16px",
+                  fontWeight:
+                    "700",
+                  color:
+                    "#FFFFFF",
+                  margin:
+                    "0 0 5px 0"
+                }}
+              >
+                Total Tasks
+              </h3>
+
+              <p
+                style={{
+                  fontSize:
+                    "18px",
+                  fontWeight:
+                    "800",
+                  color:
+                    "#FFFFFF",
+                  margin: 0
+                }}
+              >
+                {stats.total ||
+                  0}
+              </p>
+            </div>
+
+            <div
+              style={cardStyle(
+                "#22C55E"
+              )}
+            >
+              <h3
+                style={{
+                  fontSize:
+                    "16px",
+                  fontWeight:
+                    "700",
+                  color:
+                    "#FFFFFF",
+                  margin:
+                    "0 0 5px 0"
+                }}
+              >
+                Done
+              </h3>
+
+              <p
+                style={{
+                  fontSize:
+                    "18px",
+                  fontWeight:
+                    "800",
+                  color:
+                    "#FFFFFF",
+                  margin: 0
+                }}
+              >
+                {stats.done ||
+                  0}
+              </p>
+            </div>
+
+            <div
+              style={cardStyle(
+                "#FACC15"
+              )}
+            >
+              <h3
+                style={{
+                  fontSize:
+                    "16px",
+                  fontWeight:
+                    "700",
+                  color:
+                    "#FFFFFF",
+                  margin:
+                    "0 0 5px 0"
+                }}
+              >
+                Pending
+              </h3>
+
+              <p
+                style={{
+                  fontSize:
+                    "18px",
+                  fontWeight:
+                    "800",
+                  color:
+                    "#FFFFFF",
+                  margin: 0
+                }}
+              >
+                {stats.pending ||
+                  0}
+              </p>
+            </div>
+
+            <div
+              style={cardStyle(
+                "#3B82F6"
+              )}
+            >
+              <h3
+                style={{
+                  fontSize:
+                    "16px",
+                  fontWeight:
+                    "700",
+                  color:
+                    "#FFFFFF",
+                  margin:
+                    "0 0 5px 0"
+                }}
+              >
+                Underway
+              </h3>
+
+              <p
+                style={{
+                  fontSize:
+                    "18px",
+                  fontWeight:
+                    "800",
+                  color:
+                    "#FFFFFF",
+                  margin: 0
+                }}
+              >
+                {stats.underway ||
+                  0}
+              </p>
+            </div>
+
+            <div
+              style={cardStyle(
+                "#FF3B30"
+              )}
+            >
+              <h3
+                style={{
+                  fontSize:
+                    "16px",
+                  fontWeight:
+                    "700",
+                  color:
+                    "#FFFFFF",
+                  margin:
+                    "0 0 5px 0"
+                }}
+              >
+                Overdue
+              </h3>
+
+              <p
+                style={{
+                  fontSize:
+                    "18px",
+                  fontWeight:
+                    "800",
+                  color:
+                    "#FFFFFF",
+                  margin: 0
+                }}
+              >
+                {stats.overdue ||
+                  0}
+              </p>
+            </div>
+          </div>
+
+          {/* MAIN CONTENT */}
+          <div
+            style={{
+              flex: 1,
+              overflowY:
+                "auto",
+              padding: "15px"
+            }}
+          >
+
+            {/* TASKS */}
+            <div
               style={{
-                fontSize: "18px",
-                fontWeight: "700",
-                marginBottom: "15px",
-                color: "#007BFF"
+                border:
+                  "1px solid #ddd",
+                borderRadius:
+                  "10px",
+                padding:
+                  "15px",
+                background:
+                  "white",
+                borderTop:
+                  "1px solid #ddd"
               }}
             >
-              Tasks
-            </h2>
-
-            {!selectedProject ? (
-              <div
+              <h2
                 style={{
-                  border:
-                    "2px dashed #ddd",
-                  borderRadius:
-                    "10px",
-                  padding: "40px 20px",
-                  textAlign:
-                    "center",
                   fontSize:
-                    "16px",
-                  color: "#999"
+                    "18px",
+                  fontWeight:
+                    "700",
+                  marginBottom:
+                    "15px",
+                  marginTop: 0,
+                  color:
+                    "#222"
                 }}
               >
-                Select Project To View Tasks
-              </div>
-            ) : tasks.length ===
-              0 ? (
-              <div
-                style={{
-                  border:
-                    "2px dashed #ddd",
-                  borderRadius:
-                    "10px",
-                  padding: "40px 20px",
-                  textAlign:
-                    "center",
-                  fontSize:
-                    "16px",
-                  color: "#999"
-                }}
-              >
-                No Tasks Found
-              </div>
-            ) : (
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns:
-                    "repeat(auto-fill, minmax(280px, 1fr))",
-                  gap: "15px"
-                }}
-              >
-                {tasks.map((task) => {
+                Tasks
+              </h2>
 
-                  const isOverdue =
-                    task.dueDate &&
-                    new Date(task.dueDate) <
-                    new Date() &&
-                    task.status !== "done";
+              {!selectedProject ? (
+                <div
+                  style={{
+                    border:
+                      "2px dashed #ddd",
+                    borderRadius:
+                      "10px",
+                    padding:
+                      "40px 20px",
+                    textAlign:
+                      "center",
+                    background:
+                      "#f8f9fa",
+                    fontSize:
+                      "16px",
+                    color:
+                      "#999"
+                  }}
+                >
+                  Select Project To
+                  View Tasks
+                </div>
+              ) : tasks.length ===
+                0 ? (
+                <div
+                  style={{
+                    border:
+                      "2px dashed #ddd",
+                    borderRadius:
+                      "10px",
+                    padding:
+                      "40px 20px",
+                    textAlign:
+                      "center",
+                    background:
+                      "#f8f9fa",
+                    fontSize:
+                      "16px",
+                    color:
+                      "#999"
+                  }}
+                >
+                  No Tasks Found
+                </div>
+              ) : (
+                <div
+                  style={{
+                    display:
+                      "grid",
+                    gridTemplateColumns:
+                      "repeat(3, 1fr)",
+                    gap: "15px"
+                  }}
+                >
+                  {tasks.map(
+                    (task) => {
 
-                  const statusInfo = getStatusColor(isOverdue ? "overdue" : task.status);
+                      const isOverdue =
+                        task.dueDate &&
+                        new Date(
+                          task.dueDate
+                        ) <
+                        new Date() &&
+                        task.status !==
+                        "done";
 
-                  return (
-                    <div
-                      key={task._id}
-                      style={{
-                        border: "2px solid #e0e0e0",
-                        borderRadius: "10px",
-                        padding: "15px",
-                        background: "white",
-                        transition: "transform 0.2s, box-shadow 0.2s"
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = "translateY(-4px)";
-                        e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = "translateY(0)";
-                        e.currentTarget.style.boxShadow = "none";
-                      }}
-                    >
-                      <h3
-                        style={{
-                          fontSize: "16px",
-                          fontWeight: "700",
-                          marginBottom: "10px",
-                          color: "#222"
-                        }}
-                      >
-                        {task.title}
-                      </h3>
+                      const statusInfo =
+                        getStatusColor(
+                          isOverdue
+                            ? "overdue"
+                            : task.status
+                        );
 
-                      <p
-                        style={{
-                          fontSize: "14px",
-                          marginBottom: "10px",
-                          color: "#666"
-                        }}
-                      >
-                        {task.description ||
-                          "No Description"}
-                      </p>
-
-                      <div
-                        style={{
-                          display: "inline-block",
-                          padding: "6px 12px",
-                          background: statusInfo.bg,
-                          color: statusInfo.text,
-                          borderRadius: "6px",
-                          fontSize: "13px",
-                          fontWeight: "600",
-                          marginBottom: "10px"
-                        }}
-                      >
-                        {statusInfo.label}
-                      </div>
-
-                      <p
-                        style={{
-                          fontSize: "13px",
-                          marginBottom: "12px",
-                          color: "#666"
-                        }}
-                      >
-                        Due: {task.dueDate
-                          ? new Date(
-                            task.dueDate
-                          ).toLocaleDateString(
-                            "en-US",
+                      return (
+                        <div
+                          key={
+                            task._id
+                          }
+                          style={{
+                            border:
+                              "1px solid #ddd",
+                            borderRadius:
+                              "10px",
+                            padding:
+                              "15px",
+                            background:
+                              "white"
+                          }}
+                        >
+                          <h3
+                            style={{
+                              fontSize:
+                                "16px",
+                              fontWeight:
+                                "700",
+                              marginTop: 0,
+                              marginBottom:
+                                "12px",
+                              marginLeft:
+                                "-15px",
+                              marginRight:
+                                "-15px",
+                              paddingLeft:
+                                "15px",
+                              paddingRight:
+                                "15px",
+                              paddingBottom:
+                                "10px",
+                              borderBottom:
+                                "1px solid #ddd",
+                              color:
+                                "#222"
+                            }}
+                          >
                             {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric"
+                              task.title
                             }
-                          )
-                          : "No Due Date"}
-                      </p>
+                          </h3>
 
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "8px",
-                          flexWrap: "wrap"
-                        }}
-                      >
-                        <button
-                          onClick={() =>
-                            handleStatus(
-                              task._id,
-                              "underway"
-                            )
-                          }
-                          style={{
-                            ...buttonStyle("#FFB800", "white"),
-                            flex: 1,
-                            fontSize: "12px"
-                          }}
-                          onMouseEnter={(e) => e.target.style.background = "#CC9500"}
-                          onMouseLeave={(e) => e.target.style.background = "#FFB800"}
-                        >
-                          Underway
-                        </button>
+                          <p
+                            style={{
+                              fontSize:
+                                "12px",
+                              marginBottom:
+                                "10px",
+                              color:
+                                "#666"
+                            }}
+                          >
+                            <span
+                              style={{
+                                fontWeight:
+                                  "600"
+                              }}
+                            >
+                              Description:
+                            </span>{" "}
+                            {task.description ||
+                              "No Description"}
+                          </p>
 
-                        <button
-                          onClick={() =>
-                            handleStatus(
-                              task._id,
-                              "done"
-                            )
-                          }
-                          style={{
-                            ...buttonStyle("#28A745", "white"),
-                            flex: 1,
-                            fontSize: "12px"
-                          }}
-                          onMouseEnter={(e) => e.target.style.background = "#218838"}
-                          onMouseLeave={(e) => e.target.style.background = "#28A745"}
-                        >
-                          Done
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+                          <p
+                            style={{
+                              fontSize:
+                                "12px",
+                              marginBottom:
+                                "12px",
+                              color:
+                                "#666"
+                            }}
+                          >
+                            <span
+                              style={{
+                                fontWeight:
+                                  "600"
+                              }}
+                            >
+                              Due Date:
+                            </span>{" "}
+                            {task.dueDate
+                              ? new Date(
+                                task.dueDate
+                              ).toLocaleDateString(
+                                "en-US",
+                                {
+                                  month:
+                                    "short",
+                                  day: "numeric",
+                                  year:
+                                    "numeric"
+                                }
+                              )
+                              : "No Due Date"}
+                          </p>
+
+                          <div
+                            style={{
+                              display:
+                                "block",
+                              padding:
+                                "6px 12px",
+                              background:
+                                statusInfo.bg,
+                              color:
+                                statusInfo.text,
+                              borderRadius:
+                                "6px",
+                              fontSize:
+                                "13px",
+                              fontWeight:
+                                "600",
+                              marginBottom:
+                                "10px",
+                              textAlign:
+                                "center"
+                            }}
+                          >
+                            {
+                              statusInfo.label
+                            }
+                          </div>
+
+                          <div
+                            style={{
+                              display:
+                                "flex",
+                              gap: "8px",
+                              flexWrap:
+                                "wrap"
+                            }}
+                          >
+                            <button
+                              onClick={() =>
+                                handleStatus(
+                                  task._id,
+                                  "underway"
+                                )
+                              }
+                              style={{
+                                ...buttonStyle(
+                                  "#F59E0B",
+                                  "white"
+                                ),
+                                flex: 1,
+                                fontSize:
+                                  "12px"
+                              }}
+                            >
+                              Underway
+                            </button>
+
+                            <button
+                              onClick={() =>
+                                handleStatus(
+                                  task._id,
+                                  "done"
+                                )
+                              }
+                              style={{
+                                ...buttonStyle(
+                                  "#22C55E",
+                                  "white"
+                                ),
+                                flex: 1,
+                                fontSize:
+                                  "12px"
+                              }}
+                            >
+                              Done
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    }
+                  )}
+                </div>
+              )}
+            </div>
+
           </div>
         </div>
       </div>

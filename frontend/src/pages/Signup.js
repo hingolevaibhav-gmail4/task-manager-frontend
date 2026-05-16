@@ -7,6 +7,7 @@ export default function Signup({ setPage }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSignup = async () => {
     if (!name || !lastName || !email || !password) {
@@ -14,21 +15,66 @@ export default function Signup({ setPage }) {
       return;
     }
 
-    setError("");
-    const res = await signupUser({
-      name,
-      lastName,
-      email,
-      password
-    });
+    const emailRegex =
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Enter a valid email address");
+      return;
+    }
 
-    if (res._id) {
-      alert("Account created successfully");
-      setPage("login");
-    } else {
-      setError(res.error || "Signup failed");
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
+
+    setError("");
+    setLoading(true);
+
+    try {
+      const res = await signupUser({
+        name,
+        lastName,
+        email,
+        password
+      });
+
+      if (res._id) {
+        alert("Account created successfully! Please login.");
+        setPage("login");
+      } else {
+        if (res.error?.includes("duplicate")) {
+          setError("Email already registered");
+        } else {
+          setError(res.error || "Signup failed");
+        }
+      }
+    } catch (err) {
+      setError(
+        "Network error. Please try again."
+      );
+    } finally {
+      setLoading(false);
     }
   };
+
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      handleSignup();
+    }
+  };
+
+  const buttonStyle = (bgColor = "#22C55E") => ({
+    padding: "12px 16px",
+    fontSize: "14px",
+    fontWeight: "600",
+    borderRadius: "8px",
+    cursor: "pointer",
+    border: "none",
+    background: bgColor,
+    color: "white",
+    transition: "all 0.3s ease-in-out",
+    width: "100%"
+  });
 
   return (
     <div
@@ -38,26 +84,27 @@ export default function Signup({ setPage }) {
         alignItems: "center",
         justifyContent: "center",
         padding: "20px",
-        background: "linear-gradient(135deg, #007BFF 0%, #0056b3 100%)"
+        background: "#f5f5f5",
+        fontFamily: "Inter, Arial"
       }}
     >
       <div
         style={{
           width: "100%",
-          maxWidth: "450px",
-          padding: "40px 30px",
-          border: "none",
-          borderRadius: "15px",
+          maxWidth: "400px",
+          padding: "30px",
+          border: "1px solid #ddd",
+          borderRadius: "10px",
           background: "white",
-          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)"
+          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)"
         }}
       >
         <h2
           style={{
-            fontSize: "32px",
+            fontSize: "24px",
             fontWeight: "700",
-            marginBottom: "10px",
-            color: "#007BFF",
+            marginBottom: "5px",
+            color: "#222",
             textAlign: "center"
           }}
         >
@@ -66,10 +113,10 @@ export default function Signup({ setPage }) {
 
         <p
           style={{
-            fontSize: "16px",
+            fontSize: "14px",
             color: "#666",
             textAlign: "center",
-            marginBottom: "30px"
+            marginBottom: "25px"
           }}
         >
           Create Your Account
@@ -79,12 +126,12 @@ export default function Signup({ setPage }) {
           <div
             style={{
               padding: "12px 15px",
-              marginBottom: "20px",
-              background: "#FFE5E5",
-              border: "2px solid #FF4444",
+              marginBottom: "15px",
+              background: "#FFEBEE",
+              border: "1px solid #FF3B30",
               borderRadius: "8px",
-              color: "#FF4444",
-              fontSize: "14px",
+              color: "#FF3B30",
+              fontSize: "13px",
               fontWeight: "500"
             }}
           >
@@ -100,18 +147,22 @@ export default function Signup({ setPage }) {
             setName(e.target.value);
             setError("");
           }}
+          disabled={loading}
           style={{
             width: "100%",
-            padding: "14px",
-            marginBottom: "15px",
-            fontSize: "16px",
-            border: "2px solid #e0e0e0",
+            padding: "12px",
+            marginBottom: "12px",
+            fontSize: "14px",
+            border: "1px solid #ddd",
             borderRadius: "8px",
             outline: "none",
-            fontFamily: "inherit"
+            boxSizing: "border-box",
+            fontFamily: "inherit",
+            opacity: loading ? 0.6 : 1,
+            cursor: loading ? "not-allowed" : "text"
           }}
-          onFocus={(e) => e.target.style.borderColor = "#007BFF"}
-          onBlur={(e) => e.target.style.borderColor = "#e0e0e0"}
+          onFocus={(e) => e.target.style.borderColor = "#222"}
+          onBlur={(e) => e.target.style.borderColor = "#ddd"}
         />
 
         <input
@@ -122,18 +173,22 @@ export default function Signup({ setPage }) {
             setLastName(e.target.value);
             setError("");
           }}
+          disabled={loading}
           style={{
             width: "100%",
-            padding: "14px",
-            marginBottom: "15px",
-            fontSize: "16px",
-            border: "2px solid #e0e0e0",
+            padding: "12px",
+            marginBottom: "12px",
+            fontSize: "14px",
+            border: "1px solid #ddd",
             borderRadius: "8px",
             outline: "none",
-            fontFamily: "inherit"
+            boxSizing: "border-box",
+            fontFamily: "inherit",
+            opacity: loading ? 0.6 : 1,
+            cursor: loading ? "not-allowed" : "text"
           }}
-          onFocus={(e) => e.target.style.borderColor = "#007BFF"}
-          onBlur={(e) => e.target.style.borderColor = "#e0e0e0"}
+          onFocus={(e) => e.target.style.borderColor = "#222"}
+          onBlur={(e) => e.target.style.borderColor = "#ddd"}
         />
 
         <input
@@ -144,18 +199,22 @@ export default function Signup({ setPage }) {
             setEmail(e.target.value);
             setError("");
           }}
+          disabled={loading}
           style={{
             width: "100%",
-            padding: "14px",
-            marginBottom: "15px",
-            fontSize: "16px",
-            border: "2px solid #e0e0e0",
+            padding: "12px",
+            marginBottom: "12px",
+            fontSize: "14px",
+            border: "1px solid #ddd",
             borderRadius: "8px",
             outline: "none",
-            fontFamily: "inherit"
+            boxSizing: "border-box",
+            fontFamily: "inherit",
+            opacity: loading ? 0.6 : 1,
+            cursor: loading ? "not-allowed" : "text"
           }}
-          onFocus={(e) => e.target.style.borderColor = "#007BFF"}
-          onBlur={(e) => e.target.style.borderColor = "#e0e0e0"}
+          onFocus={(e) => e.target.style.borderColor = "#222"}
+          onBlur={(e) => e.target.style.borderColor = "#ddd"}
         />
 
         <input
@@ -166,39 +225,41 @@ export default function Signup({ setPage }) {
             setPassword(e.target.value);
             setError("");
           }}
+          onKeyPress={handleKeyPress}
+          disabled={loading}
           style={{
             width: "100%",
-            padding: "14px",
-            marginBottom: "25px",
-            fontSize: "16px",
-            border: "2px solid #e0e0e0",
+            padding: "12px",
+            marginBottom: "20px",
+            fontSize: "14px",
+            border: "1px solid #ddd",
             borderRadius: "8px",
             outline: "none",
-            fontFamily: "inherit"
+            boxSizing: "border-box",
+            fontFamily: "inherit",
+            opacity: loading ? 0.6 : 1,
+            cursor: loading ? "not-allowed" : "text"
           }}
-          onFocus={(e) => e.target.style.borderColor = "#007BFF"}
-          onBlur={(e) => e.target.style.borderColor = "#e0e0e0"}
+          onFocus={(e) => e.target.style.borderColor = "#222"}
+          onBlur={(e) => e.target.style.borderColor = "#ddd"}
         />
 
         <button
           onClick={handleSignup}
-          style={{
-            width: "100%",
-            padding: "14px",
-            marginBottom: "15px",
-            cursor: "pointer",
-            fontSize: "16px",
-            fontWeight: "600",
-            border: "none",
-            borderRadius: "8px",
-            background: "#28A745",
-            color: "white",
-            transition: "background-color 0.3s"
+          disabled={loading}
+          style={buttonStyle("#22C55E")}
+          onMouseEnter={(e) => {
+            if (!loading) {
+              e.target.style.transform = "translateY(-2px)";
+              e.target.style.boxShadow = "0 4px 12px rgba(34, 197, 94, 0.3)";
+            }
           }}
-          onMouseEnter={(e) => e.target.style.background = "#218838"}
-          onMouseLeave={(e) => e.target.style.background = "#28A745"}
+          onMouseLeave={(e) => {
+            e.target.style.transform = "translateY(0)";
+            e.target.style.boxShadow = "none";
+          }}
         >
-          Create Account
+          {loading ? "Creating Account..." : "Create Account"}
         </button>
 
         <p
@@ -207,13 +268,13 @@ export default function Signup({ setPage }) {
             marginTop: "15px",
             cursor: "pointer",
             textAlign: "center",
-            fontSize: "16px",
-            color: "#007BFF",
+            fontSize: "14px",
+            color: "#3B82F6",
             fontWeight: "500",
             transition: "color 0.3s"
           }}
-          onMouseEnter={(e) => e.target.style.color = "#0056b3"}
-          onMouseLeave={(e) => e.target.style.color = "#007BFF"}
+          onMouseEnter={(e) => e.target.style.color = "#222"}
+          onMouseLeave={(e) => e.target.style.color = "#3B82F6"}
         >
           Already have an account? Login
         </p>

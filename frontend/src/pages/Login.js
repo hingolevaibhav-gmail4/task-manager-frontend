@@ -16,37 +16,76 @@ export default function Login({
   const [error, setError] =
     useState("");
 
+  const [loading, setLoading] =
+    useState(false);
+
   const handleLogin = async () => {
     if (!email || !password) {
       setError("Please fill all fields");
       return;
     }
 
+    const emailRegex =
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Enter a valid email address");
+      return;
+    }
+
     setError("");
-    const res = await loginUser({
-      email,
-      password
-    });
+    setLoading(true);
 
-    if (res.token) {
-      localStorage.setItem(
-        "token",
-        res.token
-      );
+    try {
+      const res = await loginUser({
+        email,
+        password
+      });
 
-      localStorage.setItem(
-        "role",
-        res.role
-      );
+      if (res.token) {
+        localStorage.setItem(
+          "token",
+          res.token
+        );
 
-      setToken(res.token);
-      setRole(res.role);
-    } else {
+        localStorage.setItem(
+          "role",
+          res.role
+        );
+
+        setToken(res.token);
+        setRole(res.role);
+      } else {
+        setError(
+          res.error || "Login failed. Please check your credentials."
+        );
+      }
+    } catch (err) {
       setError(
-        res.error || "Login failed"
+        "Network error. Please try again."
       );
+    } finally {
+      setLoading(false);
     }
   };
+
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      handleLogin();
+    }
+  };
+
+  const buttonStyle = (bgColor = "#3B82F6") => ({
+    padding: "12px 16px",
+    fontSize: "14px",
+    fontWeight: "600",
+    borderRadius: "8px",
+    cursor: "pointer",
+    border: "none",
+    background: bgColor,
+    color: "white",
+    transition: "all 0.3s ease-in-out",
+    width: "100%"
+  });
 
   return (
     <div
@@ -56,26 +95,27 @@ export default function Login({
         alignItems: "center",
         justifyContent: "center",
         padding: "20px",
-        background: "linear-gradient(135deg, #007BFF 0%, #0056b3 100%)"
+        background: "#f5f5f5",
+        fontFamily: "Inter, Arial"
       }}
     >
       <div
         style={{
           width: "100%",
-          maxWidth: "450px",
-          padding: "40px 30px",
-          border: "none",
-          borderRadius: "15px",
+          maxWidth: "400px",
+          padding: "30px",
+          border: "1px solid #ddd",
+          borderRadius: "10px",
           background: "white",
-          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)"
+          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)"
         }}
       >
         <h2
           style={{
-            fontSize: "32px",
+            fontSize: "24px",
             fontWeight: "700",
-            marginBottom: "10px",
-            color: "#007BFF",
+            marginBottom: "5px",
+            color: "#222",
             textAlign: "center"
           }}
         >
@@ -84,10 +124,10 @@ export default function Login({
 
         <p
           style={{
-            fontSize: "16px",
+            fontSize: "14px",
             color: "#666",
             textAlign: "center",
-            marginBottom: "30px"
+            marginBottom: "25px"
           }}
         >
           Welcome Back
@@ -97,12 +137,12 @@ export default function Login({
           <div
             style={{
               padding: "12px 15px",
-              marginBottom: "20px",
-              background: "#FFE5E5",
-              border: "2px solid #FF4444",
+              marginBottom: "15px",
+              background: "#FFEBEE",
+              border: "1px solid #FF3B30",
               borderRadius: "8px",
-              color: "#FF4444",
-              fontSize: "14px",
+              color: "#FF3B30",
+              fontSize: "13px",
               fontWeight: "500"
             }}
           >
@@ -118,19 +158,23 @@ export default function Login({
             setEmail(e.target.value);
             setError("");
           }}
+          onKeyPress={handleKeyPress}
+          disabled={loading}
           style={{
             width: "100%",
-            padding: "14px",
-            marginBottom: "15px",
-            fontSize: "16px",
-            border: "2px solid #e0e0e0",
+            padding: "12px",
+            marginBottom: "12px",
+            fontSize: "14px",
+            border: error && !email ? "1px solid #FF3B30" : "1px solid #ddd",
             borderRadius: "8px",
             outline: "none",
-            transition: "border-color 0.3s",
-            fontFamily: "inherit"
+            boxSizing: "border-box",
+            fontFamily: "inherit",
+            opacity: loading ? 0.6 : 1,
+            cursor: loading ? "not-allowed" : "text"
           }}
-          onFocus={(e) => e.target.style.borderColor = "#007BFF"}
-          onBlur={(e) => e.target.style.borderColor = "#e0e0e0"}
+          onFocus={(e) => e.target.style.borderColor = "#222"}
+          onBlur={(e) => e.target.style.borderColor = error && !email ? "#FF3B30" : "#ddd"}
         />
 
         <input
@@ -141,40 +185,41 @@ export default function Login({
             setPassword(e.target.value);
             setError("");
           }}
+          onKeyPress={handleKeyPress}
+          disabled={loading}
           style={{
             width: "100%",
-            padding: "14px",
-            marginBottom: "25px",
-            fontSize: "16px",
-            border: "2px solid #e0e0e0",
+            padding: "12px",
+            marginBottom: "20px",
+            fontSize: "14px",
+            border: error && !password ? "1px solid #FF3B30" : "1px solid #ddd",
             borderRadius: "8px",
             outline: "none",
-            transition: "border-color 0.3s",
-            fontFamily: "inherit"
+            boxSizing: "border-box",
+            fontFamily: "inherit",
+            opacity: loading ? 0.6 : 1,
+            cursor: loading ? "not-allowed" : "text"
           }}
-          onFocus={(e) => e.target.style.borderColor = "#007BFF"}
-          onBlur={(e) => e.target.style.borderColor = "#e0e0e0"}
+          onFocus={(e) => e.target.style.borderColor = "#222"}
+          onBlur={(e) => e.target.style.borderColor = error && !password ? "#FF3B30" : "#ddd"}
         />
 
         <button
           onClick={handleLogin}
-          style={{
-            width: "100%",
-            padding: "14px",
-            marginBottom: "15px",
-            cursor: "pointer",
-            fontSize: "16px",
-            fontWeight: "600",
-            border: "none",
-            borderRadius: "8px",
-            background: "#007BFF",
-            color: "white",
-            transition: "background-color 0.3s"
+          disabled={loading}
+          style={buttonStyle("#22C55E")}
+          onMouseEnter={(e) => {
+            if (!loading) {
+              e.target.style.transform = "translateY(-2px)";
+              e.target.style.boxShadow = "0 4px 12px rgba(34, 197, 94, 0.3)";
+            }
           }}
-          onMouseEnter={(e) => e.target.style.background = "#0056b3"}
-          onMouseLeave={(e) => e.target.style.background = "#007BFF"}
+          onMouseLeave={(e) => {
+            e.target.style.transform = "translateY(0)";
+            e.target.style.boxShadow = "none";
+          }}
         >
-          Login
+          {loading ? "Logging in..." : "Login"}
         </button>
 
         <p
@@ -183,13 +228,13 @@ export default function Login({
             marginTop: "15px",
             cursor: "pointer",
             textAlign: "center",
-            fontSize: "16px",
-            color: "#007BFF",
+            fontSize: "14px",
+            color: "#3B82F6",
             fontWeight: "500",
             transition: "color 0.3s"
           }}
-          onMouseEnter={(e) => e.target.style.color = "#0056b3"}
-          onMouseLeave={(e) => e.target.style.color = "#007BFF"}
+          onMouseEnter={(e) => e.target.style.color = "#222"}
+          onMouseLeave={(e) => e.target.style.color = "#3B82F6"}
         >
           Don't have an account? Sign up
         </p>

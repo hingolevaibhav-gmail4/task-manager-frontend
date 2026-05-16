@@ -175,7 +175,7 @@ exports.getMembers =
       const project =
         await Project.findById(
           id
-        ).populate("members", "name lastName email");
+        ).populate("members", "email");
 
       if (!project) {
         return res.status(404).json({

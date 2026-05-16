@@ -13,9 +13,16 @@ import {
   deleteTask,
   deleteProject,
   addMember,
-  getMembers,
   getDashboard
 } from "../services/api";
+
+const scrollbarHideStyle = `
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+`;
 
 export default function AdminDashboard({
   token,
@@ -64,8 +71,14 @@ export default function AdminDashboard({
   const [editingTask, setEditingTask] =
     useState(null);
 
-  const [members, setMembers] =
-    useState([]);
+  const [loadingMember, setLoadingMember] =
+    useState(false);
+
+  const [memberError, setMemberError] =
+    useState("");
+
+  const [memberSuccess, setMemberSuccess] =
+    useState("");
 
   const loadProjects =
     useCallback(async () => {
@@ -99,6 +112,117 @@ export default function AdminDashboard({
     loadDashboard
   ]);
 
+  const handleAddMember =
+    async () => {
+
+      setMemberError("");
+      setMemberSuccess("");
+
+      if (!memberEmail) {
+        setMemberError(
+          "Enter member email"
+        );
+        return;
+      }
+
+      if (!selectedProject) {
+        setMemberError(
+          "Select a project first"
+        );
+        return;
+      }
+
+      const emailRegex =
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (
+        !emailRegex.test(memberEmail)
+      ) {
+        setMemberError(
+          "Enter a valid email address"
+        );
+        return;
+      }
+
+      setLoadingMember(true);
+
+      try {
+        const res =
+          await addMember(
+            token,
+            {
+              projectId:
+                selectedProject,
+
+              email:
+                memberEmail
+            }
+          );
+
+        console.log(
+          "Add member response:",
+          res
+        );
+
+        if (
+          res._id ||
+          res.members
+        ) {
+
+          setMemberSuccess(
+            "Member added successfully"
+          );
+
+          setMemberEmail("");
+
+          setTimeout(() => {
+            setMemberSuccess("");
+          }, 3000);
+
+        } else if (res.error) {
+
+          if (
+            res.error.includes(
+              "already"
+            )
+          ) {
+            setMemberError(
+              "Member already added to this project"
+            );
+          } else if (
+            res.error.includes(
+              "not found"
+            )
+          ) {
+            setMemberError(
+              "User with this email not found"
+            );
+          } else {
+            setMemberError(
+              res.error ||
+              "Failed to add member"
+            );
+          }
+        } else {
+          setMemberError(
+            "Unexpected response from server"
+          );
+        }
+      } catch (err) {
+
+        console.error(
+          "Add member error:",
+          err
+        );
+        setMemberError(
+          "Network error. Please try again."
+        );
+
+      } finally {
+
+        setLoadingMember(false);
+      }
+    };
+
   const loadTasks = async (
     projectId
   ) => {
@@ -107,29 +231,25 @@ export default function AdminDashboard({
       projectId
     );
 
-    const data =
-      await getTasks(
-        token,
-        projectId
+    try {
+      const data =
+        await getTasks(
+          token,
+          projectId
+        );
+
+      setTasks(
+        Array.isArray(data)
+          ? data
+          : []
       );
-
-    setTasks(
-      Array.isArray(data)
-        ? data
-        : []
-    );
-
-    const membersData =
-      await getMembers(
-        token,
-        projectId
+    } catch (err) {
+      console.error(
+        "Error loading tasks:",
+        err
       );
-
-    setMembers(
-      Array.isArray(membersData)
-        ? membersData
-        : []
-    );
+      setTasks([]);
+    }
   };
 
   const handleCreateProject =
@@ -208,60 +328,6 @@ export default function AdminDashboard({
       }
 
       loadDashboard();
-    };
-
-  const handleAddMember =
-    async () => {
-
-      if (
-        !memberEmail ||
-        !selectedProject
-      ) {
-        alert(
-          "Enter member email"
-        );
-        return;
-      }
-
-      const res =
-        await addMember(
-          token,
-          {
-            projectId:
-              selectedProject,
-
-            email:
-              memberEmail
-          }
-        );
-
-      if (res._id) {
-
-        alert(
-          "Member added successfully"
-        );
-
-        setMemberEmail("");
-
-        const membersData =
-          await getMembers(
-            token,
-            selectedProject
-          );
-
-        setMembers(
-          Array.isArray(membersData)
-            ? membersData
-            : []
-        );
-
-      } else {
-
-        alert(
-          res.error ||
-          "Failed to add member"
-        );
-      }
     };
 
   const handleEditTask =
@@ -515,6 +581,7 @@ export default function AdminDashboard({
         overflow: "hidden"
       }}
     >
+      <style>{scrollbarHideStyle}</style>
 
       {/* HEADER */}
       <div
@@ -649,7 +716,7 @@ export default function AdminDashboard({
               handleCreateProject
             }
             style={{
-              ...buttonStyle("#22C55E", "white"),
+              ...buttonStyle("#3B82F6", "white"),
               width: "100%",
               marginBottom: "15px"
             }}
@@ -662,7 +729,7 @@ export default function AdminDashboard({
               e.target.style.boxShadow = "none";
             }}
           >
-            + Create Project
+            Create Project
           </button>
 
           {projects.map(
@@ -928,14 +995,192 @@ export default function AdminDashboard({
                     Add Member
                   </h2>
 
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "10px",
+                      marginBottom: "10px"
+                    }}
+                  >
+                    <input
+                      type="email"
+                      placeholder="Member Email"
+                      value={memberEmail}
+                      onChange={(e) =>
+                        setMemberEmail(
+                          e.target.value
+                        )
+                      }
+                      style={{
+                        flex: 1,
+                        padding: "12px",
+                        fontSize: "14px",
+                        borderRadius: "8px",
+                        border: "1px solid #ddd",
+                        outline: "none"
+                      }}
+                      onFocus={(e) => e.target.style.borderColor = "#222"}
+                      onBlur={(e) => e.target.style.borderColor = "#ddd"}
+                    />
+
+                    <button
+                      onClick={
+                        handleAddMember
+                      }
+                      disabled={loadingMember}
+                      style={{
+                        ...buttonStyle("#3B82F6", "white"),
+                        cursor: loadingMember ? "not-allowed" : "pointer",
+                        opacity: loadingMember ? 0.6 : 1
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!loadingMember) {
+                          e.target.style.transform = "translateY(-3px)";
+                          e.target.style.boxShadow = "0 6px 12px rgba(0,0,0,0.15)";
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.transform = "translateY(0)";
+                        e.target.style.boxShadow = "none";
+                      }}
+                    >
+                      {loadingMember
+                        ? "Adding..."
+                        : "Add Member"}
+                    </button>
+                  </div>
+
+                  {memberError && (
+                    <div
+                      style={{
+                        padding: "10px 12px",
+                        background: "#FFEBEE",
+                        color: "#FF3B30",
+                        borderRadius: "6px",
+                        fontSize: "13px",
+                        marginBottom: "10px",
+                        border: "1px solid #ffcdd2"
+                      }}
+                    >
+                      {memberError}
+                    </div>
+                  )}
+
+                  {memberSuccess && (
+                    <div
+                      style={{
+                        padding: "10px 12px",
+                        background: "#E8F5E9",
+                        color: "#22C55E",
+                        borderRadius: "6px",
+                        fontSize: "13px",
+                        marginBottom: "10px",
+                        border: "1px solid #c8e6c9"
+                      }}
+                    >
+                      {memberSuccess}
+                    </div>
+                  )}
+                </div>
+
+                {/* CREATE TASK */}
+                <div
+                  style={{
+                    border: "1px solid #ddd",
+                    borderRadius: "10px",
+                    padding: "15px",
+                    marginBottom: "15px",
+                    background: "white"
+                  }}
+                >
+                  <h2
+                    style={{
+                      fontSize: "18px",
+                      fontWeight: "700",
+                      marginBottom: "15px",
+                      color: "#222"
+                    }}
+                  >
+                    {editingTask
+                      ? "Update Task"
+                      : "Create Task"}
+                  </h2>
+
                   <input
-                    type="email"
-                    placeholder="Member Email"
+                    type="text"
+                    placeholder="Task Title"
+                    value={taskTitle}
+                    onChange={(e) =>
+                      setTaskTitle(
+                        e.target.value
+                      )
+                    }
+                    style={{
+                      width: "100%",
+                      padding: "12px",
+                      fontSize: "14px",
+                      marginBottom: "12px",
+                      borderRadius: "8px",
+                      border: "1px solid #ddd",
+                      outline: "none"
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = "#222"}
+                    onBlur={(e) => e.target.style.borderColor = "#ddd"}
+                  />
+
+                  <textarea
+                    placeholder="Task Description"
                     value={
-                      memberEmail
+                      taskDescription
                     }
                     onChange={(e) =>
-                      setMemberEmail(
+                      setTaskDescription(
+                        e.target.value
+                      )
+                    }
+                    style={{
+                      width: "100%",
+                      padding: "12px",
+                      fontSize: "14px",
+                      marginBottom: "12px",
+                      minHeight: "80px",
+                      borderRadius: "8px",
+                      border: "1px solid #ddd",
+                      outline: "none",
+                      resize: "vertical",
+                      fontFamily: "inherit"
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = "#222"}
+                    onBlur={(e) => e.target.style.borderColor = "#ddd"}
+                  />
+
+                  <input
+                    type="email"
+                    placeholder="Assign To Email"
+                    value={assignEmail}
+                    onChange={(e) =>
+                      setAssignEmail(
+                        e.target.value
+                      )
+                    }
+                    style={{
+                      width: "100%",
+                      padding: "12px",
+                      fontSize: "14px",
+                      marginBottom: "12px",
+                      borderRadius: "8px",
+                      border: "1px solid #ddd",
+                      outline: "none"
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = "#222"}
+                    onBlur={(e) => e.target.style.borderColor = "#ddd"}
+                  />
+
+                  <input
+                    type="date"
+                    value={dueDate}
+                    onChange={(e) =>
+                      setDueDate(
                         e.target.value
                       )
                     }
@@ -954,9 +1199,9 @@ export default function AdminDashboard({
 
                   <button
                     onClick={
-                      handleAddMember
+                      handleCreateTask
                     }
-                    style={{ ...buttonStyle("#22C55E", "white") }}
+                    style={{ ...buttonStyle("#3B82F6", "white"), width: "100%" }}
                     onMouseEnter={(e) => {
                       e.target.style.transform = "translateY(-3px)";
                       e.target.style.boxShadow = "0 6px 12px rgba(0,0,0,0.15)";
@@ -966,143 +1211,11 @@ export default function AdminDashboard({
                       e.target.style.boxShadow = "none";
                     }}
                   >
-                    + Add Member
+                    {editingTask
+                      ? "Update Task"
+                      : "Assign Task"}
                   </button>
                 </div>
-
-                {/* CREATE TASK */}
-                <div
-                  style={{
-                    border: "1px solid #ddd",
-                    borderRadius: "10px",
-                    padding: "15px",
-                    marginBottom: "15px",
-                    background: "white"
-                  }}
-                >
-                  <h2
-                      style={{
-                        fontSize: "18px",
-                        fontWeight: "700",
-                        marginBottom: "15px",
-                        color: "#222"
-                      }}
-                    >
-                      {editingTask
-                        ? "Update Task"
-                        : "Create Task"}
-                    </h2>
-
-                    <input
-                      type="text"
-                      placeholder="Task Title"
-                      value={taskTitle}
-                      onChange={(e) =>
-                        setTaskTitle(
-                          e.target.value
-                        )
-                      }
-                      style={{
-                        width: "100%",
-                        padding: "12px",
-                        fontSize: "14px",
-                        marginBottom: "12px",
-                        borderRadius: "8px",
-                        border: "1px solid #ddd",
-                        outline: "none"
-                      }}
-                      onFocus={(e) => e.target.style.borderColor = "#222"}
-                      onBlur={(e) => e.target.style.borderColor = "#ddd"}
-                    />
-
-                    <textarea
-                      placeholder="Task Description"
-                      value={
-                        taskDescription
-                      }
-                      onChange={(e) =>
-                        setTaskDescription(
-                          e.target.value
-                        )
-                      }
-                      style={{
-                        width: "100%",
-                        padding: "12px",
-                        fontSize: "14px",
-                        marginBottom: "12px",
-                        minHeight: "80px",
-                        borderRadius: "8px",
-                        border: "1px solid #ddd",
-                        outline: "none",
-                        resize: "vertical",
-                        fontFamily: "inherit"
-                      }}
-                      onFocus={(e) => e.target.style.borderColor = "#222"}
-                      onBlur={(e) => e.target.style.borderColor = "#ddd"}
-                    />
-
-                    <input
-                      type="email"
-                      placeholder="Assign Member Email"
-                      value={assignEmail}
-                      onChange={(e) =>
-                        setAssignEmail(
-                          e.target.value
-                        )
-                      }
-                      style={{
-                        width: "100%",
-                        padding: "12px",
-                        fontSize: "14px",
-                        marginBottom: "12px",
-                        borderRadius: "8px",
-                        border: "1px solid #ddd",
-                        outline: "none"
-                      }}
-                      onFocus={(e) => e.target.style.borderColor = "#222"}
-                      onBlur={(e) => e.target.style.borderColor = "#ddd"}
-                    />
-
-                    <input
-                      type="date"
-                      value={dueDate}
-                      onChange={(e) =>
-                        setDueDate(
-                          e.target.value
-                        )
-                      }
-                      style={{
-                        width: "100%",
-                        padding: "12px",
-                        fontSize: "14px",
-                        marginBottom: "12px",
-                        borderRadius: "8px",
-                        border: "1px solid #ddd",
-                        outline: "none"
-                      }}
-                      onFocus={(e) => e.target.style.borderColor = "#222"}
-                      onBlur={(e) => e.target.style.borderColor = "#ddd"}
-                    />
-
-                    <button
-                      onClick={
-                        handleCreateTask
-                      }
-                      style={{ ...buttonStyle("#22C55E", "white"), width: "100%" }}
-                      onMouseEnter={(e) => {
-                        e.target.style.transform = "translateY(-3px)";
-                        e.target.style.boxShadow = "0 6px 12px rgba(0,0,0,0.15)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.transform = "translateY(0)";
-                        e.target.style.boxShadow = "none";
-                      }}
-                    >
-                      {editingTask
-                        ? "Update Task"
-                        : "Assign Task"}
-                    </button>
-                  </div>
 
                 {/* TASKS */}
                 <div
